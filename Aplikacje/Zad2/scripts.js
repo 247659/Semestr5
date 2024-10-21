@@ -18,52 +18,86 @@ let initList = function() {
 initList();
 
 let updateTodoList = function() {
-    let todoListDiv =
-    document.getElementById("todoListView");
+    let todoListDiv = document.getElementById("todoListView");
 
-    //remove all elements
+    // Usuń wszystkie istniejące elementy
     while (todoListDiv.firstChild) {
         todoListDiv.removeChild(todoListDiv.firstChild);
     }
 
-    //add all elements
-    for (let todo in todoList) {
-        let newElement = document.createElement("div");
-        let newContent = document.createTextNode(
-            todoList[todo].title + " " + todoList[todo].description);
-        newElement.appendChild(newContent);
-        todoListDiv.appendChild(newElement);
-        let newDeleteButton = document.createElement("input");
-        newDeleteButton.type = "button";
-        newDeleteButton.value = "x";
-        newDeleteButton.addEventListener("click",
-            function() {
-                deleteTodo(todo);
+    // Tworzymy tabelę
+    let table = document.createElement('table');
+    let thead = document.createElement('thead');
+    let tbody = document.createElement('tbody');
+
+    // Tworzymy nagłówki kolumn
+    let headerRow = document.createElement('tr');
+    let headers = ['Title', 'Description', 'Category' , 'Place', 'Due Date', 'Actions'];
+    headers.forEach(headerText => {
+        let th = document.createElement('th');
+        th.textContent = headerText;
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Dodajemy filtrowane elementy z todoList
+    let filterInput = document.getElementById("inputSearch").value.toLowerCase();
+
+    todoList.forEach((todo, index) => {
+        if (
+            filterInput === "" ||
+            todo.title.toLowerCase().includes(filterInput) ||
+            todo.description.toLowerCase().includes(filterInput) ||
+            todo.place.toLowerCase().includes(filterInput)
+        ) {
+            let row = document.createElement('tr');
+
+            // Tworzymy komórki dla każdej kolumny
+            let titleCell = document.createElement('td');
+            titleCell.textContent = todo.title;
+            row.appendChild(titleCell);
+
+            let descCell = document.createElement('td');
+            descCell.textContent = todo.description;
+            row.appendChild(descCell);
+
+            let catCell = document.createElement('td');
+            catCell.textContent = todo.category;
+            row.appendChild(catCell);
+
+            let placeCell = document.createElement('td');
+            placeCell.textContent = todo.place;
+            row.appendChild(placeCell);
+
+            let dueDateCell = document.createElement('td');
+            dueDateCell.textContent = todo.dueDate;
+            row.appendChild(dueDateCell);
+
+            // Tworzymy przycisk "Usuń" i dodajemy go do wiersza
+            let actionCell = document.createElement('td');
+            let deleteButton = document.createElement('button');
+            deleteButton.textContent = 'x';
+            deleteButton.addEventListener('click', function() {
+                deleteTodo(index);  // Usunięcie zadania
             });
-            newElement.appendChild(newDeleteButton);
-    }
-    //add all elements
-    let filterInput = document.getElementById("inputSearch");   
-    for (let todo in todoList) {
-    if (
-        (filterInput.value == "") ||
-        (todoList[todo].title.includes(filterInput.value)) ||
-        (todoList[todo].description.includes(filterInput.value))
-    ) {
-        let newElement = document.createElement("p");
-        let newContent = document.createTextNode(todoList[todo].title + " " +
-                                                todoList[todo].description);
-        newElement.appendChild(newContent);
-        todoListDiv.appendChild(newElement);
-    }
-    }
-}
+            actionCell.appendChild(deleteButton);
+            row.appendChild(actionCell);
+
+            // Dodajemy wiersz do tabeli
+            tbody.appendChild(row);
+        }
+    });
+
+    // Dodajemy body do tabeli i tabelę do div'a
+    table.appendChild(tbody);
+    todoListDiv.appendChild(table);
+};
 
 setInterval(updateTodoList, 1000);
 
 let deleteTodo = function(index) {
     todoList.splice(index,1);
-    //window.localStorage.removeItem("todos", JSON.stringify(todoList));
     updateJSONbin();
 }
 
@@ -88,7 +122,6 @@ let addTodo = function() {
       };
     //add item to the list
       todoList.push(newTodo);
-      //window.localStorage.setItem("todos", JSON.stringify(todoList));
       updateJSONbin();
   }
 
