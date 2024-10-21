@@ -1,4 +1,3 @@
-
 "use strict"
 let todoList = []; //declares a new array for Your todo list
 let initList = function() {
@@ -7,8 +6,7 @@ let initList = function() {
 
     req.onreadystatechange = () => {
         if (req.readyState == XMLHttpRequest.DONE) {
-            const response = JSON.parse(req.responseText); // Sparsuj odpowiedź jako JSON
-            todoList = response.record; // Przypisz odpowiedź do todoList
+            todoList = JSON.parse(req.responseText).record;
         }
     };
 
@@ -27,7 +25,6 @@ let updateTodoList = function() {
     while (todoListDiv.firstChild) {
         todoListDiv.removeChild(todoListDiv.firstChild);
     }
-    console.log(todoList)
 
     //add all elements
     for (let todo in todoList) {
@@ -60,8 +57,6 @@ let updateTodoList = function() {
         todoListDiv.appendChild(newElement);
     }
     }
-
-
 }
 
 setInterval(updateTodoList, 1000);
@@ -98,7 +93,17 @@ let addTodo = function() {
   }
 
   let updateJSONbin = function() {
-    // ciało funkcji na podstawie https://jsonbin.io/api-reference/bins/update
+      let req = new XMLHttpRequest();
 
-    // UWAGA: ta funkcja zastepuje całą zawartość bina
+      req.onreadystatechange = () => {
+          if (req.readyState == XMLHttpRequest.DONE) {
+              console.log(req.responseText);
+          }
+      };
+
+      req.open("PUT", "https://api.jsonbin.io/v3/b/671665eaad19ca34f8bc34d9", true);
+      req.setRequestHeader("Content-Type", "application/json");
+      req.setRequestHeader("X-Master-Key", "$2a$10$r33GJqovpTVcoFA64zGBO.MNuJyE08sEKINVCAUXn55xvoa8olDBC");
+
+      req.send(JSON.stringify(todoList));
     }
