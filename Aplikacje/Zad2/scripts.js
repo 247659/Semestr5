@@ -32,7 +32,7 @@ let updateTodoList = function() {
 
     // Tworzymy nagłówki kolumn
     let headerRow = document.createElement('tr');
-    let headers = ['Title', 'Description', 'Category' , 'Place', 'Due Date', 'Actions'];
+    let headers = ['Title', 'Description', 'Category', 'Place', 'Due Date', 'Actions'];
     headers.forEach(headerText => {
         let th = document.createElement('th');
         th.textContent = headerText;
@@ -41,15 +41,36 @@ let updateTodoList = function() {
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
-    // Dodajemy filtrowane elementy z todoList
+    // Pobranie wartości zakresu dat
+    let startDate = document.getElementById('inputStartDate').value;
+    let endDate = document.getElementById('inputEndDate').value;
+
+    // Pobranie wartości z pola wyszukiwania
     let filterInput = document.getElementById("inputSearch").value.toLowerCase();
 
+    // Dodajemy filtrowane elementy z todoList
     todoList.forEach((todo, index) => {
+        let taskDate = new Date(todo.dueDate);
+
+        // Sprawdzamy, czy zadanie mieści się w zakresie dat
+        let isInDateRange = true;
+        if (startDate) {
+            isInDateRange = (taskDate >= new Date(startDate));
+        }
+        if (endDate) {
+            let endDateTime = new Date(endDate);
+            endDateTime.setHours(23, 59, 59, 999);
+            isInDateRange = (taskDate <= endDateTime);
+        }
+
+        // Filtrowanie po polu wyszukiwania i po dacie
         if (
-            filterInput === "" ||
-            todo.title.toLowerCase().includes(filterInput) ||
-            todo.description.toLowerCase().includes(filterInput) ||
-            todo.place.toLowerCase().includes(filterInput)
+            isInDateRange && (
+                filterInput === "" ||
+                todo.title.toLowerCase().includes(filterInput) ||
+                todo.description.toLowerCase().includes(filterInput) ||
+                todo.place.toLowerCase().includes(filterInput)
+            )
         ) {
             let row = document.createElement('tr');
 
