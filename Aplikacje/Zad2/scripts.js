@@ -27,11 +27,14 @@ let updateTodoList = function() {
 
     // Tworzymy tabelę
     let table = document.createElement('table');
+    table.className = "table table-bordered table-hover";
     let thead = document.createElement('thead');
+    thead.className = "table-primary";
     let tbody = document.createElement('tbody');
 
     // Tworzymy nagłówki kolumn
     let headerRow = document.createElement('tr');
+    headerRow.className = "text-center";
     let headers = ['Title', 'Description', 'Category', 'Place', 'Due Date', 'Actions'];
     headers.forEach(headerText => {
         let th = document.createElement('th');
@@ -73,6 +76,7 @@ let updateTodoList = function() {
             )
         ) {
             let row = document.createElement('tr');
+            row.className = "text-center";
 
             // Tworzymy komórki dla każdej kolumny
             let titleCell = document.createElement('td');
