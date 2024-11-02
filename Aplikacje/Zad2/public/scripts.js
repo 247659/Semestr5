@@ -17,6 +17,27 @@ let initList = function() {
 
 initList();
 
+
+async function categorizeTaskClient(title, description) {
+    try {
+        const response = await fetch('/api/categorize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ title, description })
+        });
+
+        if (!response.ok) throw new Error('Błąd podczas kategoryzacji zadania');
+
+        const data = await response.json();
+        console.log('Kategoria:', data.category);
+        return data.category;
+    } catch (error) {
+        console.error('Błąd w funkcji categorizeTaskClient:', error);
+    }
+}
+
 let updateTodoList = function() {
     let todoListDiv = document.getElementById("todoListView");
 
@@ -126,7 +147,7 @@ let deleteTodo = function(index) {
     updateJSONbin();
 }
 
-let addTodo = function() {
+let addTodo = async function() {
     //get the elements in the form
       let inputTitle = document.getElementById("inputTitle");
       let inputDescription = document.getElementById("inputDescription");
@@ -137,12 +158,15 @@ let addTodo = function() {
       let newDescription = inputDescription.value;
       let newPlace = inputPlace.value;
       let newDate = new Date(inputDate.value);
+      
+      const category = await categorizeTaskClient(newTitle, newDescription);
+
     //create new item
       let newTodo = {
           title: newTitle,
           description: newDescription,
           place: newPlace,
-          category: '',
+          category: category,
           dueDate: newDate
       };
     //add item to the list
