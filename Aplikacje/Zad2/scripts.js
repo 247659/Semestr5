@@ -17,26 +17,58 @@ let initList = function() {
 
 initList();
 
+async function categorizeTask(title, description) {
+    const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    const apiKey = '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';
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+    };
 
-async function categorizeTaskClient(title, description) {
-    try {
-        const response = await fetch('/api/categorize', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
+    const jsonSchema = JSON.stringify({
+        type: "object",
+        properties: {
+            title: { title: "Name", type: "string" },
+            description: { title: "Opis", type: "string" },
+            category: { title: "Kategoria", type: "string", enum: ["uczelnia", "prywatne", "inne"] }
+        }
+    });
+
+    const body = {
+        messages: [
+            {
+                role: "system",
+                content: `You are a categorization model that categorizes tasks into one of three categories: 'uczelnia', 'prywatne', or 'inne'. The input must conform to the following json schema: ${jsonSchema}. The output should be in json format.`
             },
-            body: JSON.stringify({ title, description })
-        });
+            {
+                role: "user",
+                content: `Categorize the following task: Title: ${title}, Description: ${description}.  Please respond with the result in JSON format. Ensure your output contains valid JSON.`
+            }
+        ],
+        model: "llama3-8b-8192",
+        temperature: 0,
+        response_format: { type: "json_object" }
+    };
 
-        if (!response.ok) throw new Error('Błąd podczas kategoryzacji zadania');
+    const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body),
+    });
 
+    if (response.ok) {
         const data = await response.json();
-        console.log('Kategoria:', data.category);
-        return data.category;
-    } catch (error) {
-        console.error('Błąd w funkcji categorizeTaskClient:', error);
+        
+        // Parsujemy zawartość jako JSON
+        const categoryResponse = JSON.parse(data.choices[0].message.content); 
+        console.log(categoryResponse);
+        // Zwracamy kategorię
+        return categoryResponse.category; 
+    } else {
+        console.error(`Error: ${response.status} ${response.statusText}`);
     }
 }
+
 
 let updateTodoList = function() {
     let todoListDiv = document.getElementById("todoListView");
@@ -158,8 +190,8 @@ let addTodo = async function() {
       let newDescription = inputDescription.value;
       let newPlace = inputPlace.value;
       let newDate = new Date(inputDate.value);
-      
-      const category = await categorizeTaskClient(newTitle, newDescription);
+
+      const category = await categorizeTask(newTitle, newDescription);
 
     //create new item
       let newTodo = {
