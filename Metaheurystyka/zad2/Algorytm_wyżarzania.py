@@ -7,9 +7,9 @@ def func1(x):
     return wynik
 
 def func2(x):
-    if -105 <= x <= -95:
+    if -105 < x < -95:
         return 10 - 2 * abs(x + 100)
-    elif 95 <= x <= 105:
+    elif 95 < x < 105:
         return 11 - 2.2 * abs(x - 100)
     else:
         return 0
