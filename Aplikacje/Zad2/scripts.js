@@ -156,6 +156,7 @@ let updateTodoList = function() {
             let actionCell = document.createElement('td');
             let deleteButton = document.createElement('button');
             deleteButton.textContent = 'x';
+            deleteButton.className = "btn btn-danger"
             deleteButton.addEventListener('click', function() {
                 deleteTodo(index);  // Usunięcie zadania
             });
@@ -199,7 +200,7 @@ let addTodo = async function() {
           description: newDescription,
           place: newPlace,
           category: category,
-          dueDate: newDate
+          dueDate: newDate.toLocaleDateString('pl-PL')
       };
     //add item to the list
       todoList.push(newTodo);
