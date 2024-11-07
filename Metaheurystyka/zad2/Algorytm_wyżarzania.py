@@ -20,6 +20,7 @@ def maximum(t, a, epoki, proby, k, func, start, end):
     f1 = func(x1)
     best_x = x1
     best_result = f1
+    count = 0
 
 
     for i in range(epoki):
@@ -32,20 +33,21 @@ def maximum(t, a, epoki, proby, k, func, start, end):
                 x1 = x2
 
             if func(x1) > best_result:
+                count += 1
                 best_x = x1
                 best_result = func(x1)
 
         t *= a
-
+    print("Liczba poprawień ekstremum: " + str(count))
     return (best_x, best_result)
 
 if __name__ == '__main__':
 
     x1, f1_1 = maximum(5, 0.997, 1200, 1, 0.1, func1, -1, 2)
-    print(f"Ekstemum znalezione w punkcie x: ({x1:.2f}) o wartości {f1_1}")
+    print(f"Ekstemum znalezione w punkcie x: ({x1:.14f}) o wartości {f1_1:.14f}")
 
     x2, f1_2 = maximum(500, 0.999, 3000, 1, 0.1, func2, -150, 150)
-    print(f"Ekstemum znalezione w punkcie x: ({x2:.2f}) o wartości {f1_2}")
+    print(f"Ekstemum znalezione w punkcie x: ({x2:.6f}) o wartości {f1_2:.6f}")
 
 
 
