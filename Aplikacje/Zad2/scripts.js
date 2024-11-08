@@ -2,19 +2,24 @@
 let todoList = [];
 const jbinKey = "$2a$10$r33GJqovpTVcoFA64zGBO.MNuJyE08sEKINVCAUXn55xvoa8olDBC"
 const jbinApi = "https://api.jsonbin.io/v3/b/671665eaad19ca34f8bc34d9"
-let initList = function() {
+let initList = async function() {
+    try {
+        let response = await fetch(jbinApi, {
+            method: 'GET',
+            headers: {
+                'X-Master-Key': jbinKey
+            }
+        });
 
-    let req = new XMLHttpRequest();
-
-    req.onreadystatechange = () => {
-        if (req.readyState == XMLHttpRequest.DONE) {
-            todoList = JSON.parse(req.responseText).record;
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
-    };
 
-    req.open("GET", jbinApi, true);
-    req.setRequestHeader("X-Master-Key", jbinKey);
-    req.send();
+        let data = await response.json();
+        todoList = data.record;
+    } catch (error) {
+        console.error("Błąd podczas inicjalizacji listy z JSONbin:", error);
+    }
 }
 
 initList();
@@ -209,18 +214,23 @@ let addTodo = async function() {
       updateJSONbin();
   }
 
-  let updateJSONbin = function() {
-      let req = new XMLHttpRequest();
+let updateJSONbin = async function() {
+    try {
+        let response = await fetch(jbinApi, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': jbinKey
+            },
+            body: JSON.stringify(todoList)
+        });
 
-      req.onreadystatechange = () => {
-          if (req.readyState == XMLHttpRequest.DONE) {
-              console.log(req.responseText);
-          }
-      };
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
-      req.open("PUT", jbinApi, true);
-      req.setRequestHeader("Content-Type", "application/json");
-      req.setRequestHeader("X-Master-Key", jbinKey);
-
-      req.send(JSON.stringify(todoList));
+    } catch (error) {
+        console.error("Błąd podczas aktualizacji JSONbin:", error);
     }
+}
+
