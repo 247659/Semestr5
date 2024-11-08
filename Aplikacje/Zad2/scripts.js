@@ -1,5 +1,7 @@
 "use strict"
-let todoList = []; //declares a new array for Your todo list
+let todoList = [];
+const jbinKey = "$2a$10$r33GJqovpTVcoFA64zGBO.MNuJyE08sEKINVCAUXn55xvoa8olDBC"
+const jbinApi = "https://api.jsonbin.io/v3/b/671665eaad19ca34f8bc34d9"
 let initList = function() {
 
     let req = new XMLHttpRequest();
@@ -10,8 +12,8 @@ let initList = function() {
         }
     };
 
-    req.open("GET", "https://api.jsonbin.io/v3/b/671665eaad19ca34f8bc34d9/latest ", true);
-    req.setRequestHeader("X-Master-Key", "$2a$10$r33GJqovpTVcoFA64zGBO.MNuJyE08sEKINVCAUXn55xvoa8olDBC");
+    req.open("GET", jbinApi, true);
+    req.setRequestHeader("X-Master-Key", jbinKey);
     req.send();
 }
 
@@ -200,7 +202,7 @@ let addTodo = async function() {
           description: newDescription,
           place: newPlace,
           category: category,
-          dueDate: newDate.toLocaleDateString('pl-PL')
+          dueDate: newDate.toLocaleDateString()
       };
     //add item to the list
       todoList.push(newTodo);
@@ -216,9 +218,9 @@ let addTodo = async function() {
           }
       };
 
-      req.open("PUT", "https://api.jsonbin.io/v3/b/671665eaad19ca34f8bc34d9", true);
+      req.open("PUT", jbinApi, true);
       req.setRequestHeader("Content-Type", "application/json");
-      req.setRequestHeader("X-Master-Key", "$2a$10$r33GJqovpTVcoFA64zGBO.MNuJyE08sEKINVCAUXn55xvoa8olDBC");
+      req.setRequestHeader("X-Master-Key", jbinKey);
 
       req.send(JSON.stringify(todoList));
     }
