@@ -84,18 +84,11 @@ def selection(population):
 
 
 def crossing(parent1, parent2, point):
-    childs = []
-    childs.append(parent1[:point] + parent2[point:])
-    childs.append(parent2[:point] + parent1[point:])
-
-    return childs
+    return [parent1[:point] + parent2[point:], parent2[:point] + parent1[point:]]
 
 def mutation(individual):
     rand = random.randint(0, len(items) - 1)
-    if individual[rand] == 0:
-        individual[rand] = 1
-    else:
-        individual[rand] = 0
+    individual[rand] ^= 1
 
 
 def genetic_algorithm():
@@ -104,15 +97,17 @@ def genetic_algorithm():
     for generation in range(generations):
         new_population = []
         while len(new_population) < population_size:
-            childs = []
             parent1 = selection(population)
             parent2 = selection(population)
             if random.uniform(0, 1) < crossing_prob:
                 childs = crossing(parent1, parent2, 13)
-            if random.uniform(0, 1) < mutation_prob and len(childs) == 2:
-                mutation(childs[0])
-                mutation(childs[1])
-                new_population.extend([childs[0], childs[1]])
+            else:
+                childs = [parent1, parent2]
+
+            for child in childs:
+                if random.uniform(0, 1) < mutation_prob:
+                    mutation(child)
+                new_population.append(child)
 
         population = new_population[:population_size]
         best_individual = max(population, key=adaptation)
