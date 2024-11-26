@@ -55,7 +55,7 @@ def adaptation(individual):
     if weight_in_bag > max_weight:
         return 0
     else:
-        return weight_in_bag
+        return value
 
 def propability(population):
     adaptation_values = [adaptation(i) for i in population]
@@ -78,7 +78,7 @@ def selection(population):
 
     random_value = random.uniform(0, 1)
 
-    for j, prop in enumerate(propability_values):
+    for j, prop in enumerate(ranges):
         if random_value <= ranges[j]:
             return population[j]
 
@@ -93,6 +93,9 @@ def mutation(individual):
 
 def genetic_algorithm():
     population = generate_first_population(population_size)
+    improvement = 0
+    best_adaptation = 0
+    best_solution = []
 
     for generation in range(generations):
         new_population = []
@@ -111,13 +114,22 @@ def genetic_algorithm():
 
         population = new_population[:population_size]
         best_individual = max(population, key=adaptation)
-        best_adaptation = adaptation(best_individual)
-        print(f"Pokolenie {generation + 1}: Najlepsza wartość = {best_adaptation}")
+        current_adaptation = adaptation(best_individual)
+        print(f"Pokolenie {generation + 1}: Najlepsza wartość = {current_adaptation}")
 
-    return max(population, key=adaptation)
+        if current_adaptation > best_adaptation:
+            best_adaptation = current_adaptation
+            best_solution = best_individual
+            improvement = 0
+        else:
+            improvement += 1
 
-best_solution = genetic_algorithm()
-best_value = adaptation(best_solution)
+        if improvement > 100:
+            break
+
+    return best_adaptation, best_solution
+
+best_value, best_solution = genetic_algorithm()
 
 print("\nNajlepsze rozwiązanie:")
 print(f"Wartość: {best_value}")
