@@ -40,6 +40,8 @@ def generate_first_population(population_size):
     population = []
     for i in range (0, population_size):
         individual = [random.randint(0, 1) for _ in range(len(items))]
+        while adaptation(individual) == 0:
+            individual = [random.randint(0, 1) for _ in range(len(items))]
         population.append(individual)
     return population
 
@@ -86,9 +88,22 @@ def selection(population):
 def crossing(parent1, parent2, point):
     return [parent1[:point] + parent2[point:], parent2[:point] + parent1[point:]]
 
+def double_crossing(parent1, parent2, point1, point2):
+    if point1 > point2:
+        point1, point2 = point2, point1
+
+    child1 = parent1[:point1] + parent2[point1:point2] + parent1[point2:]
+    child2 = parent2[:point1] + parent1[point1:point2] + parent2[point2:]
+
+    return [child1, child2]
+
 def mutation(individual):
     rand = random.randint(0, len(items) - 1)
     individual[rand] ^= 1
+
+def hard_mutation(individual):
+    for i in range (len(individual)):
+        individual[i] ^= 1
 
 
 def genetic_algorithm():
@@ -137,3 +152,4 @@ print("Przedmioty w plecaku:")
 for i, gen in enumerate(best_solution):
     if gen == 1:
         print(f"- {items[i]['name']} (waga: {items[i]['weight']}, wartość: {items[i]['value']})")
+
