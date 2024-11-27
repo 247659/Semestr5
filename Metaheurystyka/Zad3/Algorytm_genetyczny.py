@@ -34,6 +34,8 @@ population_size = 100
 generations = 1000
 crossing_prob = 0.8
 mutation_prob = 0.5
+hard_mutation_prob = 0.1
+double_crossing_prob = 0.8
 
 
 def generate_first_population(population_size):
@@ -126,16 +128,22 @@ def genetic_algorithm():
     for generation in range(generations):
         new_population = []
         while len(new_population) < population_size:
-            parent1 = selection(population)
+            parent1 = elitist_selection(population)
             parent2 = selection(population)
             if random.uniform(0, 1) < crossing_prob:
-                childs = crossing(parent1, parent2, 13)
+                if random.uniform(0, 1) > double_crossing_prob:
+                    childs = double_crossing(parent1, parent2, 9, 18)
+                else:
+                    childs = crossing(parent1, parent2, 13)
             else:
                 childs = [parent1, parent2]
 
             for child in childs:
                 if random.uniform(0, 1) < mutation_prob:
-                    mutation(child)
+                    if random.uniform(0, 1) < hard_mutation_prob:
+                        hard_mutation(child)
+                    else:
+                        mutation(child)
                 new_population.append(child)
 
         population = new_population[:population_size]
