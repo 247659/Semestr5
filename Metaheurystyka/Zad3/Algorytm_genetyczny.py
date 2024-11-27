@@ -85,6 +85,17 @@ def selection(population):
             return population[j]
 
 
+def elitist_selection(population):
+    maxAdaptation = 0
+    index = 0
+    for i in range(len(population)):
+        temp = adaptation(population[i])
+        if temp > maxAdaptation:
+            maxAdaptation = temp
+            index = i
+
+    return population[index]
+
 def crossing(parent1, parent2, point):
     return [parent1[:point] + parent2[point:], parent2[:point] + parent1[point:]]
 
