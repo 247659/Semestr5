@@ -31,11 +31,10 @@ items = [
 
 max_weight = 6404180
 population_size = 100
-generations = 1000
+generations = 500
 crossing_prob = 0.8
 mutation_prob = 0.5
 hard_mutation_prob = 0.1
-double_crossing_prob = 0.8
 
 
 def generate_first_population(population_size):
@@ -88,18 +87,11 @@ def selection(population):
             return population[j]
 
 
-def elitist_selection(population):
-    return max(population, key=adaptation)
-    # maxAdaptation = 0
-    # index = 0
-    # for i in range(len(population)):
-    #     temp = adaptation(population[i])
-    #     if temp > maxAdaptation:
-    #         maxAdaptation = temp
-    #         index = i
-    #
-    # return population[index]
+def tournament_selection(population, size):
+    group = random.sample(population, size)
+    best = max(group, key=adaptation)
 
+    return best
 
 def crossing(parent1, parent2, point):
     return [parent1[:point] + parent2[point:], parent2[:point] + parent1[point:]]
@@ -125,7 +117,7 @@ def hard_mutation(individual):
         individual[i] ^= 1
 
 
-def genetic_algorithm():
+def genetic_algorithm(method, select):
     population = generate_first_population(population_size)
     improvement = 0
     best_adaptation = 0
@@ -134,11 +126,15 @@ def genetic_algorithm():
     for generation in range(generations):
 
         parents = []
-        sorted_population = sorted(population, key=adaptation, reverse=True)
-        parents = sorted_population[:5]
+
+        # sorted_population = sorted(population, key=adaptation, reverse=True)
+        # parents = sorted_population[:5]
 
         while len(parents) < population_size / 2:
-            parents.append(selection(population))
+            if select == 1:
+                parents.append(selection(population))
+            elif select == 2:
+                parents.append(tournament_selection(population, 5))
 
         new_population = []
 
@@ -147,9 +143,9 @@ def genetic_algorithm():
             parent2 = random.choice(parents)
 
             if random.uniform(0, 1) < crossing_prob:
-                if random.uniform(0, 1) > double_crossing_prob:
+                if method == 2:
                     childs = double_crossing(parent1, parent2, 9, 18)
-                else:
+                elif method == 1:
                     childs = crossing(parent1, parent2, 13)
             else:
                 childs = [parent1, parent2]
@@ -180,7 +176,7 @@ def genetic_algorithm():
     return best_adaptation, best_solution
 
 
-best_value, best_solution = genetic_algorithm()
+best_value, best_solution = genetic_algorithm(1, 1)
 
 print("\nNajlepsze rozwiązanie:")
 print(f"Wartość: {best_value}")
