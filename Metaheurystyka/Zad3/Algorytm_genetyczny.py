@@ -32,7 +32,7 @@ items = [
 max_weight = 6404180
 population_size = 100
 generations = 500
-crossing_prob = 0.8
+crossing_prob = 0.5
 mutation_prob = 0.5
 hard_mutation_prob = 0.1
 
@@ -126,10 +126,6 @@ def genetic_algorithm(method, select):
     for generation in range(generations):
 
         parents = []
-
-        # sorted_population = sorted(population, key=adaptation, reverse=True)
-        # parents = sorted_population[:5]
-
         while len(parents) < population_size / 2:
             if select == 1:
                 parents.append(selection(population))
@@ -170,13 +166,13 @@ def genetic_algorithm(method, select):
         else:
             improvement += 1
 
-        if improvement > 100:
+        if improvement > 50:
             break
 
     return best_adaptation, best_solution
 
 
-best_value, best_solution = genetic_algorithm(1, 1)
+best_value, best_solution = genetic_algorithm(2, 1)
 
 print("\nNajlepsze rozwiązanie:")
 print(f"Wartość: {best_value}")
