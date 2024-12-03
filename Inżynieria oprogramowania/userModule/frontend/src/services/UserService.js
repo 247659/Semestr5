@@ -6,6 +6,9 @@ class UserService{
     getUsers(){
         return axios.get(USER_API_URL);
     }
+
+    fillUserInformation(username, requestData) {
+        return axios.put(`${USER_API_URL}/${username}/update-data`, requestData);    }
 }
 
 

@@ -20,9 +20,9 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @PutMapping("/{username}/update-data")
+    @PutMapping("/users/{username}/update-data")
     public ResponseEntity<User> fillUserInformation(@PathVariable String username, @RequestBody UserRequest request) {
-        User updatedUser = userService.updateUserData(username, request);
+        User updatedUser = userService.fillUserInformation(username, request);
         return ResponseEntity.ok(updatedUser);
     }
 }

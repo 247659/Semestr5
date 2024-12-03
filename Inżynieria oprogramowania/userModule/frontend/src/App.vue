@@ -1,14 +1,17 @@
 <template>
   <UsersComponent />
+  <FillInformation />
 </template>
 
 <script>
+import FillInformation from './components/FillInformation.vue';
 import UsersComponent from './components/UsersComponent.vue';
 
 export default {
   name: 'App',
   components: {
-    UsersComponent
+    UsersComponent,
+    FillInformation
   }
 }
 </script>

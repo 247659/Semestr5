@@ -15,7 +15,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User updateUserData(String username, UserRequest request) {
+    public User fillUserInformation(String username, UserRequest request) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
