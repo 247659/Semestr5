@@ -4,6 +4,7 @@ const { getReasonPhrase } = require('http-status-codes');
 const express = require('express');
 const knex = require('knex')(require('../knexfile').development);
 const app = express();
+const moment = require('moment');
 app.use(express.json());
 
 const validStatusTransitions = {
@@ -40,22 +41,28 @@ app.get('/products/:id', async (req, res) => {
 });
 
 app.post('/products', async (req, res) => {
-    const { name, description, unit_price, unit_weight, categoryId } = req.body;
+    const { name, description, unit_price, unit_weight, category_id } = req.body;
 
-    if (!name || !unit_price || !unit_weight || !categoryId) {
+    if (unit_price <= 0 || unit_weight <= 0) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-            message: 'Nieprawidłowe dane. Wymagane pola: name, price, weight, categoryId.',
+            message: 'Nieprawidłowe dane. Cena lub waga mnijesza, bądź równa 0',
+        });
+    }
+
+    if (!name || !description || !unit_price || !unit_weight || !category_id ) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            message: 'Nieprawidłowe dane. Wymagane pola: name, description, price, weight, category_id.',
         });
     }
 
     try {
         const categoryExists = await knex('categories')
-            .where('id', categoryId)
+            .where('id', category_id)
             .first();
 
         if (!categoryExists) {
             return res.status(StatusCodes.NOT_FOUND).json({
-                message: `Kategoria o ID ${categoryId} nie istnieje.`,
+                message: `Kategoria o ID ${category_id} nie istnieje.`,
             });
         }
 
@@ -64,7 +71,7 @@ app.post('/products', async (req, res) => {
             description: description || '', // Opcjonalny opis
             unit_price,
             unit_weight,
-            category_id: categoryId,
+            category_id: category_id,
         });
 
         res.status(StatusCodes.CREATED).json({
@@ -82,6 +89,18 @@ app.post('/products', async (req, res) => {
 app.put('/products/:id', async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
+
+    if (updateData.unit_price <= 0 || updateData.unit_weight <= 0) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            message: 'Nieprawidłowe dane. Cena lub waga mnijesza, bądź równa 0',
+        });
+    }
+
+    if (updateData.name === '' || updateData.description === '' || updateData.category_id === '' ) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            message: 'Nieprawidłowe dane. Wymagane pola: name, price, weight, categoryId.',
+        });
+    }
 
     try {
         if (Object.keys(updateData).length === 0) {
@@ -131,27 +150,50 @@ app.post('/orders', async (req, res) => {
     const {status_id, customer_name, email, phone, products } = req.body;
 
     try {
-        // Walidacja wymaganych danych
+        let confirmationDate;
+        if (status_id === 14) {
+            confirmationDate = moment().format('YYYY-MM-DD HH:mm:ss');
+        }
+
+        const productIds = await knex('products').select('id');
+
+        let check = 0;
+
+        for (const productNew of products)  {
+            for (const product of productIds) {
+                if (productNew.product_id === product.id){
+                    check = check + 1;
+                }
+            }
+        }
+
+        if (check !== products.length) {
+            return res.status(400).json({ message: "Produkty nie istnieją w bazie" });
+        }
+
+        const phoneRegex = /^[0-9]+$/;
+        if (!phoneRegex.test(phone)) {
+            return res.status(400).json({ message: "Numer telefonu zawiera nieprawidłowe znaki." });
+        }
+
         if (!customer_name || !email || !phone || !status_id || !Array.isArray(products) || products.length === 0) {
             return res.status(400).json({ message: "Brakuje wymaganych danych zamówienia lub lista produktów jest pusta." });
         }
 
-        // Walidacja produktów
         for (const product of products) {
-            if (!product.product_id || !product.quantity || product.quantity <= 0) {
+            if (!product.product_id || !product.quantity || product.quantity <= 0 || product.quantity !== Math.floor(product.quantity)) {
                 return res.status(400).json({ message: "Nieprawidłowy format danych produktu." });
             }
         }
 
-        // Dodanie zamówienia
         const [orderId] = await knex('orders').insert({
+            confirmed_date:confirmationDate,
             customer_name,
             email,
             phone,
             status_id,
         });
 
-        // Dodanie produktów do zamówienia
         const orderItems = products.map(product => ({
             order_id: orderId,
             product_id: product.product_id,
@@ -202,9 +244,14 @@ app.patch('/orders/:id', async (req, res) => {
             });
         }
 
+        let confirmationDate;
+        if (newStatus === 'CONFIRMED') {
+            confirmationDate = moment().format('YYYY-MM-DD HH:mm:ss');
+        }
+
         await knex('orders')
             .where('id', id)
-            .update({ status_id: status.id });
+            .update({ status_id: status.id, confirmed_date: confirmationDate});
 
         res.status(StatusCodes.OK).json({
             message: `Stan zamówienia o ID ${id} został zmieniony na "${newStatus}".`
