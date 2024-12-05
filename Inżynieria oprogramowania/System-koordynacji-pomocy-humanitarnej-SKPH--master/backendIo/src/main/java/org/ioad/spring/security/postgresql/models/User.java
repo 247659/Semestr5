@@ -9,10 +9,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 @Entity
-@Table( name = "users", 
-        uniqueConstraints = { 
-          @UniqueConstraint(columnNames = "username"),
-          @UniqueConstraint(columnNames = "email") 
+@Table( name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "username"),
+                @UniqueConstraint(columnNames = "email")
         })
 public class User {
   @Id
@@ -32,22 +32,9 @@ public class User {
   @Size(max = 120)
   private String password;
 
-  @Column(name = "name")
-  private String name;
-
-  @Column(name = "surname")
-  private String surname;
-
-  @Column(name = "pesel")
-  private String pesel;
-
-
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<Role> roles = new HashSet<>();
-
-
-
 
   public User() {
   }
@@ -56,30 +43,6 @@ public class User {
     this.username = username;
     this.email = email;
     this.password = password;
-  }
-
-  public String getPesel() {
-    return pesel;
-  }
-
-  public void setPesel(String pesel) {
-    this.pesel = pesel;
-  }
-
-  public String getSurname() {
-    return surname;
-  }
-
-  public void setSurname(String surname) {
-    this.surname = surname;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public Long getId() {

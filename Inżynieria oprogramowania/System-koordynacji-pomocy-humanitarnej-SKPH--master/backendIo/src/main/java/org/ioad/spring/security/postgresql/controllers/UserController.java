@@ -1,6 +1,6 @@
 package org.ioad.spring.security.postgresql.controllers;
 
-import org.ioad.spring.security.postgresql.models.User;
+import org.ioad.spring.security.postgresql.models.UserInfo;
 import org.ioad.spring.security.postgresql.payload.request.FillDataRequest;
 import org.ioad.spring.security.postgresql.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +18,14 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getUsers() {
-        List<User> users = userService.getAllUsers();
+    public ResponseEntity<List<UserInfo>> getUsers() {
+        List<UserInfo> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
     @PutMapping("/{username}/update-data")
-    public ResponseEntity<User> fillUserInformation(@PathVariable String username, @RequestBody FillDataRequest request) {
-        User updatedUser = userService.fillUserInformation(username, request);
+    public ResponseEntity<UserInfo> fillUserInformation(@PathVariable String username, @RequestBody FillDataRequest request) {
+        UserInfo updatedUser = userService.fillUserInformation(username, request);
         return ResponseEntity.ok(updatedUser);
     }
 }
