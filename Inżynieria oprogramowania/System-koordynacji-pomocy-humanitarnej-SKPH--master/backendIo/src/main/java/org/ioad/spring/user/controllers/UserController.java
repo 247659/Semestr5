@@ -30,7 +30,7 @@ public class UserController {
 
     @GetMapping("/allVolunteers")
     public ResponseEntity<List<VolunteerDataResponse>> getAllVolunteers() {
-        List<VolunteerDataResponse> volunteers = userService.getAllVolunteers();
+        List<VolunteerDataResponse> volunteers = userService.getAllVolunteersInfo();
         return ResponseEntity.ok(volunteers);
     }
 
@@ -39,26 +39,26 @@ public class UserController {
         Optional<UserInfo> user = userService.getUser(username);
         return ResponseEntity.ok(user);
     }
-
+    
 
     @PostMapping("/{username}/uploadOrganization-data")
-    public ResponseEntity<Organization> fillOrganizationInformation(@PathVariable String username,
+    public ResponseEntity<String> fillOrganizationInformation(@PathVariable String username,
                                                                     @RequestBody OrganizationDataRequest request) {
-        Organization organization = userService.fillOrganizationInformation(username, request);
-        return ResponseEntity.ok(organization);
+        userService.fillOrganizationInformation(username, request);
+        return ResponseEntity.ok("Successfully added information about organization");
     }
 
     @PostMapping("/{username}/uploadAuthority-data")
-    public ResponseEntity<UserInfo> fillAuthorityInformation(@PathVariable String username,
+    public ResponseEntity<String> fillAuthorityInformation(@PathVariable String username,
                                                                     @RequestBody AuthorityDataRequest request) {
-        UserInfo userInfo = userService.fillAuthorityInformation(username, request);
-        return ResponseEntity.ok(userInfo);
+        userService.fillAuthorityInformation(username, request);
+        return ResponseEntity.ok("Successfully added information about authority");
     }
 
     @PostMapping("/{username}/uploadUser-data")
-    public ResponseEntity<UserInfo> fillUserInformation(@PathVariable String username,
+    public ResponseEntity<String> fillUserInformation(@PathVariable String username,
                                                              @RequestBody FillDataRequest request) {
-        UserInfo userInfo = userService.fillUserInformation(username, request);
-        return ResponseEntity.ok(userInfo);
+        userService.fillUserInformation(username, request);
+        return ResponseEntity.ok("Successfully added information about user");
     }
 }

@@ -2,6 +2,7 @@ package org.ioad.spring.user.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.ioad.spring.security.postgresql.models.User;
 
@@ -28,6 +29,12 @@ public class UserInfo {
     @Size(max = 11)
     @Column(name = "pesel")
     private String pesel;
+
+
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private EUserRoles role;
 
     @Column(name = "position")
     private String position;
@@ -117,5 +124,13 @@ public class UserInfo {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public EUserRoles getRole() {
+        return role;
+    }
+
+    public void setRole(EUserRoles role) {
+        this.role = role;
     }
 }

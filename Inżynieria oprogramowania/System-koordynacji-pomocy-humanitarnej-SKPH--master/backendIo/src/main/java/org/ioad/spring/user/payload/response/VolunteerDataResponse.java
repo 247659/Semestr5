@@ -3,11 +3,21 @@ package org.ioad.spring.user.payload.response;
 public class VolunteerDataResponse {
     private String name;
     private String surname;
+    private boolean activity;
 
 
-    public VolunteerDataResponse(String name, String surname) {
+    public VolunteerDataResponse(String name, String surname, boolean activity) {
         this.name = name;
         this.surname = surname;
+        this.activity = activity;
+    }
+
+    public boolean isActivity() {
+        return activity;
+    }
+
+    public void setActivity(boolean activity) {
+        this.activity = activity;
     }
 
     public String getName() {
