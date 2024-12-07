@@ -1,4 +1,4 @@
-package org.ioad.spring.security.postgresql.payload.response;
+package org.ioad.spring.user.payload.response;
 
 public class VolunteerDataResponse {
     private String name;

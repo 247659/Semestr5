@@ -1,8 +1,7 @@
-package org.ioad.spring.security.postgresql.repository;
+package org.ioad.spring.user.repository;
 
 import org.ioad.spring.security.postgresql.models.User;
-import org.ioad.spring.security.postgresql.models.UserInfo;
-import org.ioad.spring.security.postgresql.user.Organization;
+import org.ioad.spring.user.models.Organization;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

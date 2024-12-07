@@ -1,10 +1,9 @@
-package org.ioad.spring.security.postgresql.user;
+package org.ioad.spring.user.models;
 
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import org.ioad.spring.security.postgresql.models.User;
-import org.ioad.spring.security.postgresql.models.UserInfo;
 
 import java.util.List;
 

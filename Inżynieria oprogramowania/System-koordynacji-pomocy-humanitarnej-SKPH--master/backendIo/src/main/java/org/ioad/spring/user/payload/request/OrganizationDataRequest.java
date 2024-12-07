@@ -1,4 +1,4 @@
-package org.ioad.spring.security.postgresql.payload.request;
+package org.ioad.spring.user.payload.request;
 
 public class OrganizationDataRequest {
     private String name;

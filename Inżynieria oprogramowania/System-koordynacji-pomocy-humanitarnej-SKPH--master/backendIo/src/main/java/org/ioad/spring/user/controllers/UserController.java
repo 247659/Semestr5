@@ -1,12 +1,12 @@
-package org.ioad.spring.security.postgresql.controllers;
+package org.ioad.spring.user.controllers;
 
-import org.ioad.spring.security.postgresql.models.UserInfo;
-import org.ioad.spring.security.postgresql.payload.request.AuthorityDataRequest;
-import org.ioad.spring.security.postgresql.payload.request.FillDataRequest;
-import org.ioad.spring.security.postgresql.payload.request.OrganizationDataRequest;
-import org.ioad.spring.security.postgresql.payload.response.VolunteerDataResponse;
-import org.ioad.spring.security.postgresql.user.Organization;
-import org.ioad.spring.security.postgresql.user.UserService;
+import org.ioad.spring.user.models.UserInfo;
+import org.ioad.spring.user.payload.request.AuthorityDataRequest;
+import org.ioad.spring.user.payload.request.FillDataRequest;
+import org.ioad.spring.user.payload.request.OrganizationDataRequest;
+import org.ioad.spring.user.payload.response.VolunteerDataResponse;
+import org.ioad.spring.user.models.Organization;
+import org.ioad.spring.user.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
