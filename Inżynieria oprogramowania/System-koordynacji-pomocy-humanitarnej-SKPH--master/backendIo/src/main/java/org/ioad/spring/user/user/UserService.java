@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class UserService {
+public class UserService implements IUserService {
 
     @Autowired
     private UserInfoRepository userInfoRepository;
@@ -26,10 +26,12 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Override
     public List<Organization> getAllOrganizations() {
         return organizationRepository.findAll();
     }
 
+    @Override
     public List<UserInfo> getAllVolunteer() {
         return userInfoRepository.findByRole(EUserRoles.ROLE_VOLUNTEER);
     }
@@ -45,6 +47,7 @@ public class UserService {
         return volunteerDataResponses;
     }
 
+    @Override
     public Optional<UserInfo> getUser(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));

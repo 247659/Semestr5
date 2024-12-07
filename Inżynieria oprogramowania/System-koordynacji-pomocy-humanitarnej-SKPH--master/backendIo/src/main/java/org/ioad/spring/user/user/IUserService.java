@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IUserService {
-    public Optional<UserInfo> getUser(String username);
-    public List<Organization> getAllOrganizations();
-    public List<UserInfo> getAllVolunteer();
+    Optional<UserInfo> getUser(String username);
+    List<Organization> getAllOrganizations();
+    List<UserInfo> getAllVolunteer();
 }
