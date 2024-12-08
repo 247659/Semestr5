@@ -3,7 +3,7 @@ package org.ioad.spring.user.models;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "user_roles")
+@Table(name = "user_info_roles")
 public class UserRoles {
 
     @Id
