@@ -26,12 +26,11 @@ file_name = "A-n32-k5.txt"
 attractions_list = read_file(file_name)
 
 class Ant:
-    memory = []
     best_route = 0
 
     def __init__(self, attraction):
         self.attraction = attraction
-        self.memory.clear()
+        self.memory = []
         rand = random.randint(0, self.attraction - 1)
         self.memory.append(rand)
 
@@ -128,15 +127,15 @@ def ant_algorithm(iteration, evaporationRate, quant, quantAttraction, alpha, bet
     for i in range(iteration):
         colony = configure(quantAttraction, quant)
         bestAnt = colony[0]
-        for j in range(quantAttraction - 1):
-            for ant in colony:
-                #print(ant.memory)
+        print(i)
+        for ant in colony:
+            for j in range(quantAttraction - 1):
+
                 usedIndex, probability = probabilistically(ant, alpha, beta, pheromone)
                 rand = random.uniform(0, 1)
                 if rand <= 0.1:
                     ant.memory.append(selection(usedIndex, probability, ant))
                 else:
-                    print(probability)
                     ant.memory.append(usedIndex[probability.index(max(probability))])
 
         update_pheromones(evaporationRate, pheromone, quantAttraction, colony)
@@ -150,7 +149,7 @@ def ant_algorithm(iteration, evaporationRate, quant, quantAttraction, alpha, bet
 
 
 
-result = ant_algorithm(1,0.1,2,32,1,2)
+result = ant_algorithm(25,0.1,50,32,1,2)
 print(result.total_distance())
 #print(create_pheromone(32)[0])
 #ants = Ant(32)
