@@ -1,6 +1,7 @@
 import math
 import random
 import numpy as np
+import matplotlib.pyplot as plt
 
 def read_file(file_name):
     attractions = []
@@ -149,25 +150,21 @@ def ant_algorithm(iteration, evaporationRate, quant, quantAttraction, alpha, bet
 
 
 
-result = ant_algorithm(25,0.1,50,32,1,2)
+result = ant_algorithm(1,0.1,10,32,1,2)
 print(result.total_distance())
-#print(create_pheromone(32)[0])
-#ants = Ant(32)
-# data = 0
-# ants.memory.append(data)
-# data = 1
-# ants.memory.append(data)
-# data = 2
-# ants.memory.append(data)
-#
-#
-#print(ants.memory)
-# print(ants.total_distance())
-#
-# index, probablity = probabilistically(ants, 1, 2)
-# selection(index, probablity, ants)
-#pheromone = create_pheromone(32)
-#probabilistically(ants, 1, 2, pheromone)
+
+x = []
+y = []
+
+for memory in result.memory:
+    x.append(attractions_list[memory][1])
+    y.append(attractions_list[memory][2])
+
+plt.plot(x, y, color='blue', marker='o')
+for i in range(len(x)):
+    plt.text(x[i], y[i], f'({result.memory[i] + 1})', fontsize=6, ha='right', va='bottom')
+
+plt.show()
 
 
 
