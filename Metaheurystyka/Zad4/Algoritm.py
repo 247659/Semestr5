@@ -51,7 +51,6 @@ class Ant:
 
 
 def create_pheromone(quantAttraction):
-    # Create a 2D list (size x size) initialized with 1s
     pheromone = [[1 for _ in range(quantAttraction)] for _ in range(quantAttraction)]
     return pheromone
 
@@ -70,7 +69,6 @@ def probabilistically(ant, alpha, beta, pheromone):
     avaliAttraction = allAtraction.copy()
 
     avaliAttraction = [element for element in avaliAttraction if element not in ant.memory]
-
     usedIndex = []
     probability = []
     sumProbability = 0
@@ -88,7 +86,7 @@ def probabilistically(ant, alpha, beta, pheromone):
     return usedIndex, probability
 
 def selection(usedIndex, probability, ant):
-    allAtraction = [i for i in range(32)]
+    allAtraction = [i for i in range(len(attractions_list))]
     avaliAttraction = allAtraction.copy()
 
     avaliAttraction = [element for element in avaliAttraction if element not in ant.memory]
@@ -102,7 +100,7 @@ def selection(usedIndex, probability, ant):
     rand = random.uniform(0, 1)
     result = [rang for rang in ranges if rang[1] < rand <= rang[2]]
     if result:
-        return result[0][0]  # Zwrócenie używanego indeksu
+        return result[0][0]
     return None
 
 def update_pheromones(evaporationRate, pheromone, quantAttraction, colony):
@@ -131,7 +129,6 @@ def ant_algorithm(iteration, evaporationRate, quant, quantAttraction, alpha, bet
         print(i)
         for ant in colony:
             for j in range(quantAttraction - 1):
-
                 usedIndex, probability = probabilistically(ant, alpha, beta, pheromone)
                 rand = random.uniform(0, 1)
                 if rand <= 0.1:
@@ -147,24 +144,38 @@ def ant_algorithm(iteration, evaporationRate, quant, quantAttraction, alpha, bet
 
 
 
+if __name__ == '__main__':
+    # print("1. A-n32-k5.txt")
+    # print("2. A-n80-k10.txt")
+    #file = int(input("Wybierz plik: "))
+    file = 2
 
+    if file == 1:
+        file_name = "A-n32-k5.txt"
+    else:
+        file_name = "A-n80-k10.txt"
 
+    attractions_list = read_file(file_name)
 
-result = ant_algorithm(1,0.1,10,32,1,2)
-print(result.total_distance())
+    if file == 1:
+        result = ant_algorithm(1,0.1,10,32,1,2)
+    else:
+        result = ant_algorithm(2, 0.1, 5, 80, 1, 2)
 
-x = []
-y = []
+    print(result.total_distance())
 
-for memory in result.memory:
-    x.append(attractions_list[memory][1])
-    y.append(attractions_list[memory][2])
+    x = []
+    y = []
 
-plt.plot(x, y, color='blue', marker='o')
-for i in range(len(x)):
-    plt.text(x[i], y[i], f'({result.memory[i] + 1})', fontsize=6, ha='right', va='bottom')
+    for memory in result.memory:
+        x.append(attractions_list[memory][1])
+        y.append(attractions_list[memory][2])
 
-plt.show()
+    plt.plot(x, y, color='blue', marker='o')
+    for i in range(len(x)):
+        plt.text(x[i], y[i], f'({result.memory[i] + 1})', fontsize=6, ha='right', va='bottom')
+
+    plt.show()
 
 
 
