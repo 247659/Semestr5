@@ -104,7 +104,7 @@ app.put('/products/:id', async (req, res) => {
 
     try {
         if (Object.keys(updateData).length === 0) {
-            return res.status(400).json({ message: "Nie podano żadnych danych do aktualizacji." });
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Nie podano żadnych danych do aktualizacji." });
         }
 
         const updatedRows = await knex('products')
@@ -112,13 +112,13 @@ app.put('/products/:id', async (req, res) => {
             .update(updateData);
 
         if (updatedRows === 0) {
-            return res.status(404).json({ message: `Produkt o ID ${id} nie istnieje.` });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: `Produkt o ID ${id} nie istnieje.` });
         }
 
-        res.status(200).json({ message: `Produkt o ID ${id} został zaktualizowany.` });
+        res.status(StatusCodes.OK).json({ message: `Produkt o ID ${id} został zaktualizowany.` });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Błąd serwera podczas aktualizacji produktu." });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Błąd serwera podczas aktualizacji produktu." });
     }
 });
 
@@ -168,21 +168,21 @@ app.post('/orders', async (req, res) => {
         }
 
         if (check !== products.length) {
-            return res.status(400).json({ message: "Produkty nie istnieją w bazie" });
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Produkty nie istnieją w bazie" });
         }
 
         const phoneRegex = /^[0-9]+$/;
         if (!phoneRegex.test(phone)) {
-            return res.status(400).json({ message: "Numer telefonu zawiera nieprawidłowe znaki." });
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Numer telefonu zawiera nieprawidłowe znaki." });
         }
 
         if (!customer_name || !email || !phone || !status_id || !Array.isArray(products) || products.length === 0) {
-            return res.status(400).json({ message: "Brakuje wymaganych danych zamówienia lub lista produktów jest pusta." });
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Brakuje wymaganych danych zamówienia lub lista produktów jest pusta." });
         }
 
         for (const product of products) {
             if (!product.product_id || !product.quantity || product.quantity <= 0 || product.quantity !== Math.floor(product.quantity)) {
-                return res.status(400).json({ message: "Nieprawidłowy format danych produktu." });
+                return res.status(StatusCodes.BAD_REQUEST).json({ message: "Nieprawidłowy format danych produktu." });
             }
         }
 
@@ -201,10 +201,10 @@ app.post('/orders', async (req, res) => {
         }));
         await knex('order_items').insert(orderItems);
 
-        res.status(201).json({ message: `Zamówienie o ID ${orderId} zostało utworzone.` });
+        res.status(StatusCodes.CREATED).json({ message: `Zamówienie o ID ${orderId} zostało utworzone.` });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Błąd serwera podczas tworzenia zamówienia." });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Błąd serwera podczas tworzenia zamówienia." });
     }
 });
 
