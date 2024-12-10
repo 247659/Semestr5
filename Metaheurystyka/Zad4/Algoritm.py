@@ -2,6 +2,7 @@ import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 def read_file(file_name):
     attractions = []
@@ -145,6 +146,7 @@ def ant_algorithm(iteration, evaporationRate, quant, quantAttraction, alpha, bet
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     # print("1. A-n32-k5.txt")
     # print("2. A-n80-k10.txt")
     #file = int(input("Wybierz plik: "))
@@ -158,9 +160,9 @@ if __name__ == '__main__':
     attractions_list = read_file(file_name)
 
     if file == 1:
-        result = ant_algorithm(1,0.1,10,32,1,2)
+        result = ant_algorithm(5,0.1,50,32,1,2)
     else:
-        result = ant_algorithm(2, 0.1, 5, 80, 1, 2)
+        result = ant_algorithm(10, 0.1, 10, 80, 1, 2)
 
     print(result.total_distance())
 
@@ -176,6 +178,9 @@ if __name__ == '__main__':
         plt.text(x[i], y[i], f'({result.memory[i] + 1})', fontsize=6, ha='right', va='bottom')
 
     plt.show()
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"Czas wykonania: {execution_time:.5f} sekund")
 
 
 
