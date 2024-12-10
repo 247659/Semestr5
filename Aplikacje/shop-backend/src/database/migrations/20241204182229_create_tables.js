@@ -41,6 +41,14 @@ exports.up = function(knex) {
                 .references('id').inTable('products')
                 .onDelete('CASCADE');
             table.integer('quantity').unsigned().notNullable();
+        })
+        .createTable('opinions', (table) => {
+            table.increments('id').primary(); // Klucz główny
+            table.integer('rating').notNullable().checkBetween([1, 5]); // Ocena 1-5
+            table.text('content').notNullable(); // Treść opinii
+            table.integer('order_id').unsigned().notNullable()
+                .references('id').inTable('orders')
+                .onDelete('CASCADE');
         });
 };
 
@@ -50,9 +58,11 @@ exports.up = function(knex) {
  */
 exports.down = function(knex) {
     return knex.schema
+        .dropTableIfExists('opinions')
         .dropTableIfExists('order_items')
         .dropTableIfExists('orders')
         .dropTableIfExists('order_statuses')
         .dropTableIfExists('products')
         .dropTableIfExists('categories');
+
 };

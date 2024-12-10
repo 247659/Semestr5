@@ -316,4 +316,46 @@ app.get('/status', async (req, res) => {
     }
 });
 
+app.post('/orders/:id/opinions', async (req, res) => {
+    const { id } = req.params; // Pobieranie ID zamówienia z parametru URL
+    const { rating, content } = req.body; // Pobieranie danych opinii z ciała żądania
+
+    try {
+        if (!rating || !content || typeof rating !== 'number' || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nieprawidłowe dane opinii. Ocena powinna być liczbą całkowitą od 1 do 5, a treść opinii nie może być pusta.' });
+        }
+
+        const order = await knex('orders')
+            .select('id', 'status_id')
+            .where({ id })
+            .first();
+
+        if (!order) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: `Zamówienie o ID ${id} nie istnieje.` });
+        }
+
+        const allowedStatuses = ['COMPLETED', 'CANCELLED'];
+
+        const orderStatus = await knex('order_statuses')
+            .select('name')
+            .where({ id: order.status_id })
+            .first();
+
+        if (!allowedStatuses.includes(orderStatus.name)) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Opinię można dodać tylko do zamówienia, które jest ZREALIZOWANE lub ANULOWANE.' });
+        }
+
+        const [newOpinionId] = await knex('opinions').insert({
+            order_id: id,
+            rating,
+            content
+        });
+
+        res.status(StatusCodes.CREATED).json({ message: 'Opinia została dodana.', opinion_id: newOpinionId });
+    } catch (error) {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera podczas dodawania opinii.' });
+    }
+});
+
 app.listen(8888, () => console.log(`Server started on http://localhost:8888`));
