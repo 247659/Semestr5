@@ -29,16 +29,21 @@ class Ant:
         self.memory = [random.randint(0, num_attractions - 1)]
         self.total_distance = 0.0
 
-    def calculate_distance(self, a, b):
-        ax, ay = attractions_list[a][1:]
-        bx, by = attractions_list[b][1:]
-        return np.hypot(ax - bx, ay - by)
-
-    def update_distance(self):
+    def update_distance(self, distances):
         self.total_distance = sum(
-            self.calculate_distance(self.memory[i], self.memory[i + 1])
+            distances[self.memory[i], self.memory[i + 1]]
             for i in range(len(self.memory) - 1)
         )
+
+def prepare_distances(attractions):
+    size = len(attractions)
+    distances = np.zeros((size, size))
+    for i in range(size):
+        for j in range(i + 1, size):
+            dist = np.hypot(attractions[i][1] - attractions[j][1], attractions[i][2] - attractions[j][2])
+            distances[i][j] = dist
+            distances[j][i] = dist
+    return distances
 
 def initialize_pheromone_matrix(size):
     return np.ones((size, size))
@@ -46,14 +51,14 @@ def initialize_pheromone_matrix(size):
 def create_colony(num_ants, num_attractions):
     return [Ant(num_attractions) for _ in range(num_ants)]
 
-def calculate_probabilities(ant, pheromone, alpha, beta):
+def calculate_probabilities(ant, pheromone, alpha, beta, distances):
     current = ant.memory[-1]
     unvisited = set(range(len(attractions_list))) - set(ant.memory)
     probabilities = []
 
     for attraction in unvisited:
         pheromone_strength = pheromone[current][attraction] ** alpha
-        heuristic_value = (1 / ant.calculate_distance(current, attraction)) ** beta
+        heuristic_value = (1 / distances[current][attraction]) ** beta
         probabilities.append((attraction, pheromone_strength * heuristic_value))
 
     total = sum(prob[1] for prob in probabilities)
@@ -86,7 +91,7 @@ def best(colony, prevBestAnt):
 def find_best_ant(colony):
     return min(colony, key=lambda ant: ant.total_distance)
 
-def ant_colony_optimization(iterations, evaporation_rate, num_ants, num_attractions, alpha, beta):
+def ant_colony_optimization(iterations, evaporation_rate, num_ants, num_attractions, alpha, beta, distances):
     pheromone = initialize_pheromone_matrix(num_attractions)
     best_ant = None
 
@@ -96,7 +101,7 @@ def ant_colony_optimization(iterations, evaporation_rate, num_ants, num_attracti
         print(i)
         for ant in colony:
             for _ in range(num_attractions - 1):
-                probabilities = calculate_probabilities(ant, pheromone, alpha, beta)
+                probabilities = calculate_probabilities(ant, pheromone, alpha, beta, distances)
                 rand = random.uniform(0, 1)
                 if rand <= 0.1:
                     next_attraction = selection(probabilities)
@@ -106,7 +111,7 @@ def ant_colony_optimization(iterations, evaporation_rate, num_ants, num_attracti
                     ant.memory.append(next_attraction[0])
 
 
-            ant.update_distance()
+            ant.update_distance(distances)
 
         update_pheromones(pheromone, colony, evaporation_rate)
         best_ant = best(colony, best_ant)
@@ -122,8 +127,11 @@ if __name__ == "__main__":
     attractions_list = read_file(file_name)
 
     if attractions_list:
+        distances = prepare_distances(attractions_list)
+
         best_result = ant_colony_optimization(
-            iterations=100, evaporation_rate=0.1, num_ants=50, num_attractions=len(attractions_list), alpha=1, beta=2
+            iterations=100, evaporation_rate=0.1, num_ants=50, num_attractions=len(attractions_list), alpha=1, beta=2,
+            distances=distances
         )
         end_time = time.time()
         execution_time = end_time - start_time
