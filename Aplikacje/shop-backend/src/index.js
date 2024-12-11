@@ -4,8 +4,9 @@ const { getReasonPhrase } = require('http-status-codes');
 const express = require('express');
 const knex = require('knex')(require('../knexfile').development);
 const app = express();
-const axios = require('axios');
 const moment = require('moment');
+const axios = require('axios');
+
 app.use(express.json());
 
 const validStatusTransitions = {
@@ -69,7 +70,7 @@ app.post('/products', async (req, res) => {
 
         const [productId] = await knex('products').insert({
             name,
-            description: description || '',
+            description: description || '', // Opcjonalny opis
             unit_price,
             unit_weight,
             category_id: category_id,
@@ -359,71 +360,66 @@ app.post('/orders/:id/opinions', async (req, res) => {
     }
 });
 
-app.post('/init', async (req, res) => {
-    let errors = [];
-    let correct = [];
-    const categories = [
-        {id: 1, name: 'Electronics' },
-        {id: 2, name: 'Clothing' },
-        {id: 3, name: 'Food' },
-    ];
+app.post('/products/:id/seo-description', async (req, res) => {
+    const { id } = req.params;
+    const apiKey = process.env["API_KEY_GROQ"];
+    let product;
 
     try {
-        await knex.raw('ALTER TABLE products AUTO_INCREMENT = 1');
+        const products = await knex('products').select('*').where({ id });
+        product = products[0];
     } catch (error) {
-        return res.status(StatusCodes.BAD_REQUEST).json({ message: "Błąd podczas resetowania auto-increment:", error });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .send({
+                error: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR)
+            });
     }
 
-    try {
-        const productCount = await knex('products').count('id as count').first();
-        if (productCount.count > 0) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Baza danych już zawiera produkty." });
-        }
+    const productData = {
+        name: product.name,
+        description: product.description,
+        unit_price: product.unit_price,
+        unit_weight: product.unit_weight,
+    };
 
-        const categoriesCount = await knex('categories').count('id as count').first();
-        if (categoriesCount.count > 0) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Baza danych już zawiera kategorie." });
-        }
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+    };
 
-        const products = req.body;
-
-        if (!Array.isArray(products) || products.length === 0) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Nieprawidłowe dane. Oczekiwano tablicy produktów." });
-        }
-
-        await knex('categories').insert(categories);
-
-        for (const product of products) {
-            try {
-                await axios.post('http://localhost:8888/products', product, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                correct.push({
-                    message: `Dodano: ${product.name}`,
-                })
-
-            } catch (error) {
-                errors.push({
-                    error: error.response?.data || error.message,
-                    product,
-                });
+    const body = {
+        messages: [
+            {
+                role: 'system',
+                content: `You are a description model that creates concise, SEO-friendly product descriptions in valid HTML format. Do not add any additional notes, explanations, or comments.. 
+                The input must conform to the following JSON schema: ${productData}. The output should be in html format`,
+            },
+            {
+                role: 'user',
+                content: `Generate an SEO-friendly HTML description for the following product: ${JSON.stringify(productData)}. 
+               Only include the HTML structure and the required content. Avoid including any extra notes or instructions in your response. `,
             }
-        }
+        ],
+        model: "llama3-8b-8192",
+        temperature: 0
+    };
+    
+    try {
+        const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', body, { headers });
+        const seoDescription = response.data.choices[0].message.content;
 
-        if (errors.length > 0) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                message: "Niektóre produkty nie zostały dodane.",
-                errors,
-                correct,
-            });
-        }
-
-        res.status(StatusCodes.OK).json({ message: "Baza danych została zainicjalizowana." });
+        res.status(StatusCodes.OK).send(`
+        <html lang="pl">
+            <body>
+                ${seoDescription}
+            </body>
+        </html>
+    `);
     } catch (error) {
-        console.error(error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Błąd serwera podczas inicjalizacji bazy danych." });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
+            error: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
+            message: 'Nie udało się wygenerować opisu SEO.',
+        });
     }
 });
 

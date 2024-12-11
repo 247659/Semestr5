@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/test")
+@RequestMapping("/api")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class UserController {
 
