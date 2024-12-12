@@ -3,7 +3,6 @@
  * @returns { Promise<void> } 
  */
 exports.seed = async function(knex) {
-  // Deletes ALL existing entries
   await knex('order_items').del();
   await knex('orders').del();
   await knex('order_statuses').del();
@@ -48,22 +47,22 @@ exports.seed = async function(knex) {
   ];
   await knex('products').insert(products);
 
-  const orders = [
-    {
-      status_id : 2,
-      customer_name : "Piotrek",
-      email : "email@email.com",
-      phone : "123056",
-    }
-  ];
-  await knex('orders').insert(orders);
-
-  const order_items = [
-    {
-      order_id : 1,
-      product_id : 1,
-      quantity : 2
-    }
-  ]
-  await knex('order_items').insert(order_items);
+  // const orders = [
+  //   {
+  //     status_id : 2,
+  //     customer_name : "Piotrek",
+  //     email : "email@email.com",
+  //     phone : "123056",
+  //   }
+  // ];
+  // await knex('orders').insert(orders);
+  //
+  // const order_items = [
+  //   {
+  //     order_id : 1,
+  //     product_id : 1,
+  //     quantity : 2
+  //   }
+  // ]
+  // await knex('order_items').insert(order_items);
 };

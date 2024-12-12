@@ -22,6 +22,12 @@ exports.up = function(knex) {
             table.increments('id').primary();
             table.string('name').notNullable();
         })
+        .createTable('users', (table) => {
+            table.increments('id').primary(); // Auto-incrementing primary key
+            table.string('username', 255).notNullable().unique(); // Unique username
+            table.string('password', 255).notNullable(); // Hashed password
+            table.enu('role', ['KLIENT', 'PRACOWNIK']).notNullable(); // Role as ENUM
+        })
         .createTable('orders', (table) => {
             table.increments('id').primary();
             table.dateTime('confirmed_date').nullable();
@@ -31,6 +37,9 @@ exports.up = function(knex) {
             table.string('customer_name').notNullable();
             table.string('email').notNullable();
             table.string('phone').notNullable();
+            table.integer('user_id').unsigned().notNullable()
+                .references('id').inTable('users')
+                .onDelete('CASCADE');
         })
         .createTable('order_items', (table) => {
             table.increments('id').primary();
@@ -63,6 +72,7 @@ exports.down = function(knex) {
         .dropTableIfExists('orders')
         .dropTableIfExists('order_statuses')
         .dropTableIfExists('products')
-        .dropTableIfExists('categories');
+        .dropTableIfExists('categories')
+        .dropTableIfExists('users');
 
 };

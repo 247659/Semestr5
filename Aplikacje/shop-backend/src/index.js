@@ -6,8 +6,23 @@ const knex = require('knex')(require('../knexfile').development);
 const app = express();
 const moment = require('moment');
 const axios = require('axios');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 app.use(express.json());
+
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Brak tokenu autoryzacji.' });
+
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
+        if (err) return res.status(StatusCodes.FORBIDDEN).json({ message: 'Nieprawidłowy token.' });
+
+        req.user = user;
+        next();
+    });
+};
 
 const validStatusTransitions = {
     UNCONFIRMED: ['CONFIRMED', 'CANCELLED'],
@@ -16,7 +31,7 @@ const validStatusTransitions = {
     COMPLETED: []
 };
 
-app.get('/products', async (req, res) => {
+app.get('/products', authenticateToken, async (req, res) => {
     try {
         const products = await knex('products').select('*');
         res.json(products);
@@ -28,7 +43,7 @@ app.get('/products', async (req, res) => {
     }
 });
 
-app.get('/products/:id', async (req, res) => {
+app.get('/products/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -42,7 +57,7 @@ app.get('/products/:id', async (req, res) => {
     }
 });
 
-app.post('/products', async (req, res) => {
+app.post('/products', authenticateToken, async (req, res) => {
     const { name, description, unit_price, unit_weight, category_id } = req.body;
 
     if (unit_price <= 0 || unit_weight <= 0) {
@@ -88,7 +103,7 @@ app.post('/products', async (req, res) => {
     }
 });
 
-app.put('/products/:id', async (req, res) => {
+app.put('/products/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
@@ -124,7 +139,7 @@ app.put('/products/:id', async (req, res) => {
     }
 });
 
-app.get('/categories', async (req, res) => {
+app.get('/categories', authenticateToken, async (req, res) => {
     try {
         const categories = await knex('categories').select('*');
         res.json(categories);
@@ -136,7 +151,7 @@ app.get('/categories', async (req, res) => {
     }
 });
 
-app.get('/orders', async (req, res) => {
+app.get('/orders', authenticateToken, async (req, res) => {
     try {
         const orders = await knex('orders').select('*');
         res.json(orders);
@@ -152,6 +167,15 @@ app.post('/orders', async (req, res) => {
     const {status_id, customer_name, email, phone, products } = req.body;
 
     try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Brak tokenu autoryzacyjnego.' });
+        }
+
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+        const userId = decoded.id;
+
         let confirmationDate;
         if (status_id === 14) {
             confirmationDate = moment().format('YYYY-MM-DD HH:mm:ss');
@@ -194,6 +218,7 @@ app.post('/orders', async (req, res) => {
             email,
             phone,
             status_id,
+            user_id:userId
         });
 
         const orderItems = products.map(product => ({
@@ -210,7 +235,7 @@ app.post('/orders', async (req, res) => {
     }
 });
 
-app.patch('/orders/:id', async (req, res) => {
+app.patch('/orders/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const { newStatus } = req.body;
 
@@ -264,7 +289,7 @@ app.patch('/orders/:id', async (req, res) => {
     }
 });
 
-app.get('/orders/:id', async (req, res) => {
+app.get('/orders/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -278,7 +303,7 @@ app.get('/orders/:id', async (req, res) => {
     }
 });
 
-app.get('/orders/customer/:customer_name', async (req, res) => {
+app.get('/orders/customer/:customer_name', authenticateToken, async (req, res) => {
     const { customer_name } = req.params;
 
     try {
@@ -292,7 +317,7 @@ app.get('/orders/customer/:customer_name', async (req, res) => {
     }
 });
 
-app.get('/orders/status/:status_id', async (req, res) => {
+app.get('/orders/status/:status_id', authenticateToken, async (req, res) => {
     const { status_id } = req.params;
 
     try {
@@ -306,7 +331,7 @@ app.get('/orders/status/:status_id', async (req, res) => {
     }
 });
 
-app.get('/status', async (req, res) => {
+app.get('/status', authenticateToken, async (req, res) => {
     try {
         const status = await knex('order_statuses').select('*');
         res.json(status);
@@ -327,13 +352,28 @@ app.post('/orders/:id/opinions', async (req, res) => {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nieprawidłowe dane opinii. Ocena powinna być liczbą całkowitą od 1 do 5, a treść opinii nie może być pusta.' });
         }
 
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Brak tokenu autoryzacyjnego." });
+        }
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+        const userId = decoded.id;
+
+
         const order = await knex('orders')
-            .select('id', 'status_id')
+            .select('id', 'status_id', 'user_id')
             .where({ id })
             .first();
 
         if (!order) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: `Zamówienie o ID ${id} nie istnieje.` });
+        }
+
+        console.log(userId);
+        console.log(order.user_id);
+        if (order.user_id !== userId) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Nie możesz dodać opinii do tego zamówienia." });
         }
 
         const allowedStatuses = ['COMPLETED', 'CANCELLED'];
@@ -360,7 +400,7 @@ app.post('/orders/:id/opinions', async (req, res) => {
     }
 });
 
-app.post('/products/:id/seo-description', async (req, res) => {
+app.post('/products/:id/seo-description', authenticateToken,  async (req, res) => {
     const { id } = req.params;
     const apiKey = process.env["API_KEY_GROQ"];
     let product;
@@ -423,7 +463,7 @@ app.post('/products/:id/seo-description', async (req, res) => {
     }
 });
 
-app.post('/init', async (req, res) => {
+app.post('/init', authenticateToken, async (req, res) => {
     let errors = [];
     let correct = [];
     const categories = [
@@ -481,5 +521,70 @@ app.post('/init', async (req, res) => {
     }
 });
 
+app.post('/register', async (req, res) => {
+    const { username, password, role } = req.body;
+
+    if (!username || !password || !['KLIENT', 'PRACOWNIK'].includes(role)) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nieprawidłowe dane.' });
+    }
+
+    let userCheck = await knex('users')
+        .where({ username }).first();
+
+    if (userCheck === undefined) {
+        userCheck = 0
+    }
+
+    if (userCheck !== 0) {
+        return res.status(StatusCodes.NOT_FOUND).json({ message: `Nazwa użytkownika zajęta.` });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await knex('users').insert({ username, password: hashedPassword, role });
+        res.status(StatusCodes.CREATED).json({ message: 'Użytkownik zarejestrowany.' });
+    } catch (error) {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera.' });
+    }
+});
+
+app.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        const user = await knex('users').where({ username }).first();
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Nieprawidłowe dane logowania.' });
+        }
+
+        const accessToken = jwt.sign({ id: user.id, username: user.username, role: user.role }, process.env.TOKEN_SECRET, { expiresIn: 86400 });
+        const refreshToken = jwt.sign({ id: user.id, username: user.username, role: user.role }, process.env.TOKEN_REFRESH_SECRET, { expiresIn: 525600 });
+
+        res.status(StatusCodes.OK).json({ accessToken, refreshToken });
+    } catch (error) {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera.' });
+    }
+});
+
+app.post('/refresh', async (req, res) => {
+    const { refToken } = req.body;
+
+    if (!refToken) return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Brak tokenu.' });
+
+    try {
+        const decoded = jwt.verify(refToken, process.env.TOKEN_REFRESH_SECRET);
+
+        const { id, username, role } = decoded;
+        const accessToken = jwt.sign({ id: id, username: username, role: role }, process.env.TOKEN_SECRET, { expiresIn: 86400 });
+        res.status(StatusCodes.OK).json({ accessToken});
+    } catch (err) {
+        return res.sendStatus(StatusCodes.FORBIDDEN);
+    }
+
+
+
+});
 
 app.listen(8888, () => console.log(`Server started on http://localhost:8888`));
