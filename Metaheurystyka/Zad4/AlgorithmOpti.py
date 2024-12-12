@@ -10,13 +10,10 @@ def read_file(file_name):
     try:
         with open(file_name, "r") as file:
             for line in file:
-                # Split the line into parts
                 data = line.split()
-                # Parse the attraction number and coordinates
                 attraction_id = int(data[0])
                 x_coord = float(data[1])
                 y_coord = float(data[2])
-                # Add as a tuple (id, x, y) to the list
                 attractions.append([attraction_id, x_coord, y_coord])
     except FileNotFoundError:
         print(f"File '{file_name}' does not exist!")
@@ -88,10 +85,8 @@ def best(colony, prevBestAnt):
         bestAnt = tempBestAnt
 
     return bestAnt
-def find_best_ant(colony):
-    return min(colony, key=lambda ant: ant.total_distance)
 
-def ant_colony_optimization(iterations, evaporation_rate, num_ants, num_attractions, alpha, beta, distances):
+def ant_colony(iterations, evaporation_rate, num_ants, num_attractions, alpha, beta, distances):
     pheromone = initialize_pheromone_matrix(num_attractions)
     best_ant = None
 
@@ -115,21 +110,26 @@ def ant_colony_optimization(iterations, evaporation_rate, num_ants, num_attracti
 
         update_pheromones(pheromone, colony, evaporation_rate)
         best_ant = best(colony, best_ant)
-        # current_best = find_best_ant(colony)
-        # if best_ant is None or current_best.total_distance < best_ant.total_distance:
-        #     best_ant = current_best
 
     return best_ant
 
 if __name__ == "__main__":
     start_time = time.time()
-    file_name = "A-n80-k10.txt"
+
+    file = 2
+
+    if file == 1:
+        file_name = "A-n32-k5.txt"
+    elif file == 2:
+        file_name = "A-n80-k10.txt"
+    else:
+        file_name = "A-n80-k5.txt"
     attractions_list = read_file(file_name)
 
     if attractions_list:
         distances = prepare_distances(attractions_list)
 
-        best_result = ant_colony_optimization(
+        best_result = ant_colony(
             iterations=100, evaporation_rate=0.1, num_ants=50, num_attractions=len(attractions_list), alpha=1, beta=2,
             distances=distances
         )
