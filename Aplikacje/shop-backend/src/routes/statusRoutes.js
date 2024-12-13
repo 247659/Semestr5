@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/authMiddleware');
-const { makeInit } = require('../controller/statusController');
+const { getStatus } = require('../controller/statusController');
 
-router.get('/', authenticateToken, makeInit);
+router.get('/', authenticateToken, getStatus);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const {StatusCodes, getReasonPhrase} = require("http-status-codes");
+const knex = require('knex')(require('../../knexfile').development);
 
 const getCategories = async (req, res) => {
     try {
