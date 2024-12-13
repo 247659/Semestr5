@@ -75,11 +75,25 @@ const creatOrders = async (req, res) => {
             user_id:userId
         });
 
-        const orderItems = products.map(product => ({
-            order_id: orderId,
-            product_id: product.product_id,
-            quantity: product.quantity,
-        }));
+        const orderItems = await Promise.all(
+            products.map(async (product) => {
+                const productData = await knex('products')
+                    .select('unit_price')
+                    .where({ id: product.product_id })
+                    .first();
+
+                if (!productData) {
+                    throw new Error(`Product with ID ${product.product_id} not found.`);
+                }
+
+                return {
+                    order_id: orderId,
+                    product_id: product.product_id,
+                    quantity: product.quantity,
+                    unit_price: productData.unit_price, // Pobieramy cenę z bazy danych
+                };
+            })
+        );
         await knex('order_items').insert(orderItems);
 
         res.status(StatusCodes.CREATED).json({ message: `Zamówienie o ID ${orderId} zostało utworzone.` });

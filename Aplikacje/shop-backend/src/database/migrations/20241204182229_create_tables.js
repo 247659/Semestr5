@@ -23,10 +23,10 @@ exports.up = function(knex) {
             table.string('name').notNullable();
         })
         .createTable('users', (table) => {
-            table.increments('id').primary(); // Auto-incrementing primary key
-            table.string('username', 255).notNullable().unique(); // Unique username
-            table.string('password', 255).notNullable(); // Hashed password
-            table.enu('role', ['KLIENT', 'PRACOWNIK']).notNullable(); // Role as ENUM
+            table.increments('id').primary();
+            table.string('username', 255).notNullable().unique();
+            table.string('password', 255).notNullable();
+            table.enu('role', ['KLIENT', 'PRACOWNIK']).notNullable();
         })
         .createTable('orders', (table) => {
             table.increments('id').primary();
@@ -50,11 +50,12 @@ exports.up = function(knex) {
                 .references('id').inTable('products')
                 .onDelete('CASCADE');
             table.integer('quantity').unsigned().notNullable();
+            table.decimal('unit_price', 10, 2).notNullable();
         })
         .createTable('opinions', (table) => {
-            table.increments('id').primary(); // Klucz główny
-            table.integer('rating').notNullable().checkBetween([1, 5]); // Ocena 1-5
-            table.text('content').notNullable(); // Treść opinii
+            table.increments('id').primary();
+            table.integer('rating').notNullable().checkBetween([1, 5]);
+            table.text('content').notNullable();
             table.integer('order_id').unsigned().notNullable()
                 .references('id').inTable('orders')
                 .onDelete('CASCADE');
