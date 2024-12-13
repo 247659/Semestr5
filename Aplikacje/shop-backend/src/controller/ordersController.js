@@ -18,9 +18,19 @@ const getOrder = async (req, res) => {
 };
 
 const creatOrders = async (req, res) => {
-    const {status_id, customer_name, email, phone, products } = req.body;
+    const {customer_name, email, phone, products } = req.body;
 
     try {
+        const status = await knex('order_statuses')
+            .select('id')
+            .where({ name: 'UNCONFIRMED' })
+            .first();
+
+        const status_id = status ? status.id : null;
+
+        if (!status_id) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nie znaleziono statusu "UNCONFIRMED".' });
+        }
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Brak tokenu autoryzacyjnego.' });
