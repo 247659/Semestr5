@@ -172,6 +172,9 @@ const getOrderById = async (req, res) => {
 
     try {
         const orders = await knex('orders').select('*').where({ id });
+        if (orders.length === 0) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: `Zamówienie o ID ${id} nie istnieje.` });
+        }
         res.json(orders);
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -186,6 +189,9 @@ const getOrderByCustomer = async (req, res) => {
 
     try {
         const orders = await knex('orders').select('*').where({ customer_name });
+        if (orders.length === 0) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: `Zamówienie, którego kupującym jest ${customer_name} nie istnieje.` });
+        }
         res.json(orders);
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -200,6 +206,9 @@ const getOrderByStatus = async (req, res) => {
 
     try {
         const orders = await knex('orders').select('*').where({ status_id });
+        if (orders.length === 0) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: `Zamówienie o statusie ${status_id} nie istnieje.` });
+        }
         res.json(orders);
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR)

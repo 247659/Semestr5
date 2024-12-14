@@ -20,6 +20,10 @@ const getProductById = async (req, res) => {
 
     try {
         const products = await knex('products').select('*').where({ id });
+        if (products.length === 0) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: `Produkt o ID ${id} nie istnieje.` });
+        }
+
         res.json(products);
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -124,6 +128,10 @@ const seoDescription = async (req, res) => {
             .send({
                 error: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR)
             });
+    }
+    console.log(product);
+    if (product === undefined) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ message: `Produkt o ID ${id} nie istnieje.` });
     }
 
     const productData = {
