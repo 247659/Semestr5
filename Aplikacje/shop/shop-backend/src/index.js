@@ -1,6 +1,14 @@
 require('dotenv').config({ path: '../.env' });
 const express = require('express');
+const cors = require('cors');
+
 const app = express();
+
+app.use(cors({
+    origin: 'http://localhost:5173', // Adres Twojego frontendu
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Dopuszczalne metody
+    credentials: true, // Jeśli potrzebujesz ciasteczek lub nagłówków autoryzacji
+  }));
 const productRoutes = require('./routes/productRoutes');
 const ordersRoutes = require('./routes/orderRoutes');
 const categoriesRoutes = require('./routes/categoriesRoutes');

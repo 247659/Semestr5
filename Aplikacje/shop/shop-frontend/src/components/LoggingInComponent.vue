@@ -1,22 +1,48 @@
 <script setup>
 import { ref, inject } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 const router = useRouter()
 const loggedIn = inject('loggedIn')
 const setLoggedIn = inject('setLoggedIn')
+const accessToken = inject('accessToken');
 const username = ref('')
 const password = ref('')
+const errorMessage = ref('');
 
-const handleLogin = () => {
+// const handleLogin = () => {
+//   const userData = {
+//     username: username.value,
+//     password: password.value
+//   }
+//   console.log(JSON.stringify(userData))
+//   setLoggedIn(true)
+//   router.push('/')
+// }
+
+const handleLogin = async () => {
   const userData = {
     username: username.value,
     password: password.value
   }
-  console.log(JSON.stringify(userData))
-  setLoggedIn(true)
-  router.push('/')
-}
+  try {
+    const response = await axios.post('http://localhost:8888/auth/login', { username: username.value,
+      password: password.value,
+    });
+    accessToken.value = response.data.accessToken;
+
+    // Zapisz token w localStorage
+    localStorage.setItem('accessToken', response.data.accessToken);
+
+    setLoggedIn(true);
+    router.push('/');
+  } catch (error) {
+    errorMessage.value = 'Nieprawidłowe dane logowania.';
+    console.error(error);
+  }
+};
+
 </script>
 
 <template>
@@ -33,7 +59,9 @@ const handleLogin = () => {
             <input type="password" class="form-control" id="floatingPassword" placeholder="password" v-model="password">
             <label for="floatingPassword">Password</label>
           </div>
-  
+          
+          <p v-if="errorMessage" class="text-danger">{{ errorMessage }}</p>
+
           <button class="btn btn-primary w-100 py-2" type="submit">Sign in</button>
         </form>
       </main>

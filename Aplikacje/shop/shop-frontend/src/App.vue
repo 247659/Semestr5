@@ -1,15 +1,30 @@
 <script setup>
-import { ref, provide } from 'vue';
+import { ref, provide, onMounted } from 'vue';
 import { RouterLink, RouterView} from 'vue-router'
 import { BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav, BNavItem, BNavItemDropdown, BDropdownItem, vBColorMode } from 'bootstrap-vue-next'
 
+const accessToken = ref(null)
 const loggedIn = ref(false)
 const setLoggedIn = (value) => {
   loggedIn.value = value
+  if (!value) {
+    accessToken.value = null
+    localStorage.removeItem('accessToken')
+  }
 }
 
 provide('loggedIn', loggedIn)
 provide('setLoggedIn', setLoggedIn)
+provide('accessToken', accessToken);
+
+onMounted(() => {
+  // Sprawdź, czy token istnieje w localStorage (np. po odświeżeniu strony)
+  const token = localStorage.getItem('accessToken');
+  if (token) {
+    accessToken.value = token;
+    loggedIn.value = true;
+  }
+});
 </script>
 
 <template>
