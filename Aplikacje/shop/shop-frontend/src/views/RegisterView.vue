@@ -1,10 +1,10 @@
 <script setup>
-import LoggingInComponent from '../components/LoggingInComponent.vue'
+import RegisterComponent from '../components/RegisterComponent.vue'
 </script>
 
 <template>
   <div >
-    <LoggingInComponent />
+    <RegisterComponent />
   </div>
 </template>
 

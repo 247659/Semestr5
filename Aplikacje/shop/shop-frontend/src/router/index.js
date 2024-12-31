@@ -20,6 +20,7 @@ const router = createRouter({
     {
       path: '/register',
       name: 'register',
+      component: () => import('../views/RegisterView.vue'), //idk czemu błąd ale bez tego nie działa
     },
   ],
 })
