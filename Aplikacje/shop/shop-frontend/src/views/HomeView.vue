@@ -4,7 +4,7 @@ const message = ref('Hello World!')
 </script>
 
 <template>
-  <div>
+  <div class="d-flex justify-content-center align-items-center vh-100">
     <h1>{{ message }}</h1>
   </div>
 </template>

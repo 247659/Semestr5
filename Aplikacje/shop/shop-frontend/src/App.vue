@@ -1,7 +1,7 @@
 <script setup>
 import { ref, provide } from 'vue';
 import { RouterLink, RouterView} from 'vue-router'
-import { BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav, BNavItem, BNavItemDropdown, BDropdownItem } from 'bootstrap-vue-next'
+import { BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav, BNavItem, BNavItemDropdown, BDropdownItem, vBColorMode } from 'bootstrap-vue-next'
 
 const loggedIn = ref(false)
 const setLoggedIn = (value) => {
@@ -14,7 +14,7 @@ provide('setLoggedIn', setLoggedIn)
 
 <template>
   <div>
-    <BNavbar v-b-color-mode="'dark'" toggleable="lg" variant="primary" class="fixed-top w-100">
+    <BNavbar v-b-color-mode="'light'" toggleable="lg" variant="primary" class="fixed-top w-100">
       <BNavbarBrand>
         <RouterLink to="/" class="nav-link">
           <font-awesome-icon icon="fa-solid fa-house" class="me-2"/>Home</RouterLink>
@@ -39,11 +39,6 @@ provide('setLoggedIn', setLoggedIn)
     </BNavbar>
   </div>
   
-  <!-- <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav> -->
-
   <RouterView />
 </template>
 

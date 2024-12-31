@@ -3,8 +3,7 @@ import LoggingInComponent from '../components/LoggingInComponent.vue'
 </script>
 
 <template>
-  <div>
-    <h1>Sign In</h1>
+  <div >
     <LoggingInComponent />
   </div>
 </template>
