@@ -1,28 +1,16 @@
 <script setup>
-import { ref, provide, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { RouterLink, RouterView} from 'vue-router'
 import { BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav, BNavItem, BNavItemDropdown, BDropdownItem, vBColorMode } from 'bootstrap-vue-next'
+import { useAuthStore } from './stores/auth'
 
-const accessToken = ref(null)
-const loggedIn = ref(false)
-const setLoggedIn = (value) => {
-  loggedIn.value = value
-  if (!value) {
-    accessToken.value = null
-    localStorage.removeItem('accessToken')
-  }
-}
-
-provide('loggedIn', loggedIn)
-provide('setLoggedIn', setLoggedIn)
-provide('accessToken', accessToken);
+const authStore = useAuthStore()
 
 onMounted(() => {
   // Sprawdź, czy token istnieje w localStorage (np. po odświeżeniu strony)
   const token = localStorage.getItem('accessToken');
   if (token) {
-    accessToken.value = token;
-    loggedIn.value = true;
+    authStore.setAccessToken(token)
   }
 });
 </script>
@@ -40,10 +28,10 @@ onMounted(() => {
           <BNavItem> 
             <font-awesome-icon icon="fa-solid fa-cart-shopping" /> Order
           </BNavItem>
-          <RouterLink v-if="!loggedIn" to="/signIn" class="nav-link">
+          <RouterLink v-if="!authStore.loggedIn" to="/signIn" class="nav-link">
             <font-awesome-icon icon="fa-solid fa-sign-in-alt" class="me-2"/>Sign In
           </RouterLink>
-          <RouterLink v-else to="/" class="nav-link" @click="setLoggedIn(false)">
+          <RouterLink v-else to="/" class="nav-link" @click="authStore.setAccessToken(null)">
             <font-awesome-icon icon="fa-solid fa-sign-out-alt" class="me-2"/>Sign Out
           </RouterLink>
           <RouterLink to="/register" class="nav-link">

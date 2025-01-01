@@ -1,25 +1,16 @@
 <script setup>
-import { ref, inject } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 import axios from 'axios'
 
+const authStore = useAuthStore()
 const router = useRouter()
-const loggedIn = inject('loggedIn')
-const setLoggedIn = inject('setLoggedIn')
-const accessToken = inject('accessToken');
+
 const username = ref('')
 const password = ref('')
 const errorMessage = ref('');
 
-// const handleLogin = () => {
-//   const userData = {
-//     username: username.value,
-//     password: password.value
-//   }
-//   console.log(JSON.stringify(userData))
-//   setLoggedIn(true)
-//   router.push('/')
-// }
 
 const handleLogin = async () => {
   const userData = {
@@ -27,15 +18,8 @@ const handleLogin = async () => {
     password: password.value
   }
   try {
-    const response = await axios.post('http://localhost:8888/auth/login', { username: username.value,
-      password: password.value,
-    });
-    accessToken.value = response.data.accessToken;
-
-    // Zapisz token w localStorage
-    localStorage.setItem('accessToken', response.data.accessToken);
-
-    setLoggedIn(true);
+    const response = await axios.post('http://localhost:8888/auth/login', userData)
+    authStore.setAccessToken(response.data.accessToken)
     router.push('/');
   } catch (error) {
     errorMessage.value = 'Nieprawidłowe dane logowania.';
