@@ -24,7 +24,7 @@ const register = async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         await knex('users').insert({ username, password: hashedPassword, role });
-        res.status(StatusCodes.CREATED).json({ message: 'Użytkownik zarejestrowany.' });
+        res.status(StatusCodes.CREATED).json({ message: 'Użytkownik zarejestrowany. Zaloguj się' });
     } catch (error) {
         console.error(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera.' });

@@ -1,16 +1,24 @@
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import axios from 'axios'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const username = ref('')
 const password = ref('')
 const errorMessage = ref('');
+const successMessage = ref('')
 
+
+onMounted(() => {
+  if (route.query.message) {
+    successMessage.value = route.query.message
+  }
+})
 
 const handleLogin = async () => {
   const userData = {
@@ -22,7 +30,12 @@ const handleLogin = async () => {
     authStore.setAccessToken(response.data.accessToken)
     router.push('/');
   } catch (error) {
-    errorMessage.value = 'Nieprawidłowe dane logowania.';
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = 'Błąd połączenia z serwerem.'
+    }
+    
     console.error(error);
   }
 };
@@ -32,6 +45,11 @@ const handleLogin = async () => {
 <template>
     <div class="d-flex justify-content-center align-items-center vh-100">
       <main class="form-signin w-100 m-auto">
+
+        <div v-if="successMessage" class="alert alert-success text-center" role="alert">
+          {{ successMessage }}
+        </div>
+
         <form @submit.prevent="handleLogin">
           <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
   
@@ -50,6 +68,8 @@ const handleLogin = async () => {
         </form>
       </main>
     </div>
+
+    
   </template>
   
   <style scoped>
