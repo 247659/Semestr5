@@ -3,7 +3,7 @@ import RegisterComponent from '../components/RegisterComponent.vue'
 </script>
 
 <template>
-  <div >
+  <div class='order-view-container'>
     <RegisterComponent />
   </div>
 </template>

@@ -43,7 +43,7 @@ const handleLogin = async () => {
 </script>
 
 <template>
-    <div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="d-flex justify-content-center align-items-center">
       <main class="form-signin w-100 m-auto">
 
         <div v-if="successMessage" class="alert alert-success text-center" role="alert">

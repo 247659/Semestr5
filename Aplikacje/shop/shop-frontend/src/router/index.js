@@ -22,6 +22,11 @@ const router = createRouter({
       name: 'register',
       component: () => import('../views/RegisterView.vue'), //idk czemu błąd ale bez tego nie działa
     },
+    {
+      path: '/order',
+      name: 'order',
+      component: () => import('../views/OrderView.vue'), //idk czemu błąd ale bez tego nie działa
+    },
   ],
 })
 

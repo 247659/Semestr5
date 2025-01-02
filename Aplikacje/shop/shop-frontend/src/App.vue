@@ -1,10 +1,12 @@
 <script setup>
 import { onMounted } from 'vue';
 import { RouterLink, RouterView} from 'vue-router'
-import { BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav, BNavItem, BNavItemDropdown, BDropdownItem, vBColorMode } from 'bootstrap-vue-next'
+import { BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav, BNavItem, vBColorMode } from 'bootstrap-vue-next'
 import { useAuthStore } from './stores/auth'
+import { useOrderStore } from './stores/order';
 
 const authStore = useAuthStore()
+const orderStore = useOrderStore()
 
 onMounted(() => {
   // Sprawdź, czy token istnieje w localStorage (np. po odświeżeniu strony)
@@ -17,7 +19,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <BNavbar v-b-color-mode="'light'" toggleable="lg" variant="primary" class="fixed-top w-100">
+    <BNavbar v-b-color-mode="'light'" toggleable="lg" variant="primary" class="fixed-top w-100 navbar">
       <BNavbarBrand>
         <RouterLink to="/" class="nav-link">
           <font-awesome-icon icon="fa-solid fa-house" class="me-2"/>Home</RouterLink>
@@ -25,9 +27,9 @@ onMounted(() => {
       <BNavbarToggle target="nav-collapse" />
       <BCollapse id="nav-collapse" is-nav>
         <BNavbarNav class="ms-auto mb-2 mb-lg-0">
-          <BNavItem> 
-            <font-awesome-icon icon="fa-solid fa-cart-shopping" /> Order
-          </BNavItem>
+          <RouterLink to="/order" class="nav-link">
+            <font-awesome-icon icon="fa-solid fa-cart-shopping" /> Order({{ orderStore.diffrentProductsQuantity }})
+          </RouterLink>
           <RouterLink v-if="!authStore.loggedIn" to="/signIn" class="nav-link">
             <font-awesome-icon icon="fa-solid fa-sign-in-alt" class="me-2"/>Sign In
           </RouterLink>
@@ -45,6 +47,17 @@ onMounted(() => {
   <RouterView />
 </template>
 
-<style scoped>
+<style>
+  .navbar {
+  height: 60px; /* Przykładowa wysokość */
+  background-color: #333;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+}
 
+.order-view-container {
+  margin-top: 100px; /* Dopasuj do wysokości navbar */
+}
 </style>

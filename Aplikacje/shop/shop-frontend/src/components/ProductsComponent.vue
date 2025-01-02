@@ -2,6 +2,9 @@
 import axios from 'axios'
 import { ref, onMounted, computed } from 'vue'
 import { BTable, BFormSelect, BContainer, BRow, BCol, BFormGroup, BInputGroup, BFormInput, BInputGroupText, BButton} from 'bootstrap-vue-next'
+import { useOrderStore } from '../stores/order'
+
+const orderStore = useOrderStore()
 
 const products = ref([])
 const categories = ref([])
@@ -12,13 +15,18 @@ const fields = [
   { key: 'name', label: 'Name' },
   { key: 'description', label: 'Description' },
   { key: 'unit_price', label: 'Price' },
-  { key: 'unit_weight', label: 'Weight' }
+  { key: 'unit_weight', label: 'Weight' },
+  { key: 'actions', label: 'Actions', class: 'text-center' }
 ]
 
 onMounted(async () => {
     try {
         const response = await axios.get('http://localhost:8888/products')
-        products.value = response.data
+        products.value = response.data.map(product => ({
+      ...product,
+      unit_price: parseFloat(product.unit_price),
+    }))
+        console.log(products.value)
     } catch (error) {
         console.log(error)
     }
@@ -39,6 +47,12 @@ const filteredProducts = computed(() => {
     product.category_id === selectedCategory.value
   )
 })
+
+const handleAction = (item) => {
+    console.log('Clicked on item:', item)
+    orderStore.addProductToCard(item)
+  // Tutaj dodaj logikę dla przycisku, np. otwarcie modala lub wykonanie akcji
+};
 
 </script>
 
@@ -69,10 +83,15 @@ const filteredProducts = computed(() => {
                 {{ data.item.description }}
             </template>
             <template #cell(unit_price)="data">
-                {{ data.item.unit_price }}
+                ${{ data.item.unit_price }}
             </template>
             <template #cell(unit_weight)="data">
                 {{ data.item.unit_weight }}
+            </template>
+            <template #cell(actions)="data">
+                <BButton size="sm" variant="primary" @click="handleAction(data.item)">
+                    <font-awesome-icon icon="fa-solid fa-cart-plus" /> Add to card
+                </BButton>
             </template>
         </BTable>
     </BContainer>

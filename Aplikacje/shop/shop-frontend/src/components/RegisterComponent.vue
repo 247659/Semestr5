@@ -52,7 +52,7 @@ const handleRegister = async () => {
 </script>
 
 <template>
-    <div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="d-flex justify-content-center align-items-center">
       <main class="form-signin w-100 m-auto">
         <form @submit.prevent="handleRegister">
           <h1 class="h3 mb-3 fw-normal">Please register</h1>
