@@ -1,9 +1,19 @@
 <script setup>
 import axios from 'axios'
-import { ref, onMounted } from 'vue'
-import { BTableSimple, BThead, BTr, BTh, BTbody, BTd } from 'bootstrap-vue-next'
+import { ref, onMounted, computed } from 'vue'
+import { BTable, BFormSelect, BContainer, BRow, BCol, BFormGroup, BInputGroup, BFormInput, BInputGroupText, BButton} from 'bootstrap-vue-next'
 
 const products = ref([])
+const categories = ref([])
+const filter = ref('')
+const selectedCategory = ref('')
+
+const fields = [
+  { key: 'name', label: 'Name' },
+  { key: 'description', label: 'Description' },
+  { key: 'unit_price', label: 'Price' },
+  { key: 'unit_weight', label: 'Weight' }
+]
 
 onMounted(async () => {
     try {
@@ -12,31 +22,58 @@ onMounted(async () => {
     } catch (error) {
         console.log(error)
     }
-  
+    try {
+        const response = await axios.get('http://localhost:8888/categories')
+        categories.value = response.data
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+
+const filteredProducts = computed(() => {
+    if (!selectedCategory.value) {
+    return products.value
+  }
+  return products.value.filter(product => 
+    product.category_id === selectedCategory.value
+  )
 })
 
 </script>
 
 <template>
-    <div class="container mt-5">
-    <h1 class="mb-4">Products</h1>
-    <BTableSimple hover responsive>
-      <BThead class="table-dark">
-        <BTr>
-          <BTh>Name</BTh>
-          <BTh>Description</BTh>
-          <BTh>Price</BTh>
-          <BTh>Weight</BTh>
-        </BTr>
-      </BThead>
-      <BTbody>
-        <BTr v-for="product in products" :key="product.id">
-          <BTd>{{ product.name }}</BTd>
-          <BTd>{{ product.description }}</BTd>
-          <BTd>{{ product.unit_price }}</BTd>
-          <BTd>{{ product.unit_weight }}</BTd>
-        </BTr>
-      </BTbody>
-    </BTableSimple>
-  </div>
+    <BContainer>
+        <BRow>
+            <BCol lg="4" class="my-1">
+                <BFormGroup>
+                    <BInputGroup>
+                        <BFormInput v-model="filter" type="search" placeholder="Type to Search"/>
+                        <BInputGroupText>
+                            <BButton :disabled="!filter" @click="filter = ''">Clear</BButton>
+                        </BInputGroupText>
+                    </BInputGroup>
+                </BFormGroup>
+            </BCol>
+            <BCol lg="4" class="my-1">
+                <BFormGroup>
+                    <BFormSelect v-model="selectedCategory" :options="[{ value: '', text: 'All Categories' }, ...categories.map(category => ({ value: category.id, text: category.name }))]" />
+                </BFormGroup>
+            </BCol>
+        </BRow>
+        <BTable :items="filteredProducts" :fields="fields" :filter="filter" striped bordered hover>
+            <template #cell(name)="data">
+                {{ data.item.name }}
+            </template>
+            <template #cell(description)="data">
+                {{ data.item.description }}
+            </template>
+            <template #cell(unit_price)="data">
+                {{ data.item.unit_price }}
+            </template>
+            <template #cell(unit_weight)="data">
+                {{ data.item.unit_weight }}
+            </template>
+        </BTable>
+    </BContainer>
 </template>

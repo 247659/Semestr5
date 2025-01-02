@@ -3,6 +3,6 @@ const router = express.Router();
 const { authenticateToken } = require('../middleware/authMiddleware');
 const { getCategories } = require('../controller/categoriesController');
 
-router.get('/', authenticateToken, getCategories);
+router.get('/', getCategories);
 
 module.exports = router;
