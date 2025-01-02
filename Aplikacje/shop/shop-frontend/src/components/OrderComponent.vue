@@ -1,16 +1,18 @@
 <script setup>
 import axios from 'axios'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { BTable, BFormSelect, BContainer, BRow, BCol, BFormGroup, BInputGroup, BFormInput, BInputGroupText, BButton} from 'bootstrap-vue-next'
 import { useOrderStore } from '../stores/order'
+import { useAuthStore } from '../stores/auth'
 
 const orderStore = useOrderStore()
+const authStore = useAuthStore()
 
-const username = ref('')
+const name = ref('')
 const email = ref('')
 const number = ref('')
 const errorMessage = ref('');
-const products = orderStore.getProducts
+const successMessage = ref('');
 
 const fields = [
   { key: 'name', label: 'Name' },
@@ -19,35 +21,42 @@ const fields = [
   { key: 'totalPrice', label: 'Total Price' },
   { key: 'actions', label: 'Actions', class: 'text-center' }
 ]
-const handleAction = () => {
-    console.log(products)
-  // Tutaj dodaj logikę dla przycisku, np. otwarcie modala lub wykonanie akcji
-};
 
-// const handleOrder = async () => {
-//   const userData = {
-//     username: username.value,
-//     password: password.value
-//   }
-//   try {
-//     const response = await axios.post('http://localhost:8888/auth/login', userData)
-//     authStore.setAccessToken(response.data.accessToken)
-//     router.push('/');
-//   } catch (error) {
-//     if (error.response && error.response.data && error.response.data.message) {
-//       errorMessage.value = error.response.data.message
-//     } else {
-//       errorMessage.value = 'Błąd połączenia z serwerem.'
-//     }
-    
-//     console.error(error);
-//   }
-// };
+const products = computed(() => orderStore.getProducts);
+
+
+const handleOrder = async () => {
+    const orderData = {
+        customer_name: name.value,
+        email: email.value,
+        phone: number.value,
+        products: orderStore.getProducts.map(product => ({
+            product_id: product.id,
+            quantity: product.quantity
+        }))
+    }
+  try {
+    const response = await axios.post('http://localhost:8888/orders', orderData, {
+        headers: {
+        Authorization: `Bearer ${authStore.accessToken}`
+      }
+    })
+    successMessage.value = response.data.message
+    orderStore.clearOrder()
+  } catch (error) {
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = 'Błąd połączenia z serwerem.'
+    }
+    console.error(error);
+  }
+};
 
 </script>
 
 <template>
-    <BContainer>
+    <BContainer v-if:="products.length > 0">
         <BTable :items="products" :fields="fields" striped bordered hover>
             <template #cell(name)="data">
                 {{ data.item.name }}
@@ -56,13 +65,21 @@ const handleAction = () => {
                 ${{ data.item.price }}
             </template>
             <template #cell(quantity)="data">
-                {{ data.item.quantity }}
+                <div class="d-flex justify-content-center align-items-center">
+                    <BButton size="sm" @click="orderStore.incrementProduct(data.item.id)" class="me-2">
+                        <font-awesome-icon icon="fa-solid fa-plus"/>
+                    </BButton>
+                    {{ data.item.quantity }}
+                    <BButton size="sm" @click="orderStore.decrementProduct(data.item.id)" class="ms-2">
+                        <font-awesome-icon icon="fa-solid fa-minus"/>
+                    </BButton>
+                </div>
             </template>
             <template #cell(totalPrice)="data">
                 ${{ data.item.quantity * data.item.price }}
             </template>
             <template #cell(actions)="data">
-                <BButton size="sm" variant="danger" @click="handleAction()">
+                <BButton size="sm" variant="danger" @click="orderStore.removeProduct(data.item.id)">
                     <font-awesome-icon icon="fa-solid fa-xmark" /> Remove
                 </BButton>
             </template>
@@ -70,13 +87,13 @@ const handleAction = () => {
         <div class="total-price">
             <h3>Total Price: ${{ orderStore.totalPrice }}</h3>
         </div>
-
-        <form @submit.prevent="handleLogin">
+        
+        <form @submit.prevent="handleOrder">
           <h1 class="h3 mb-3 fw-normal">Add personal data</h1>
   
           <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="floatingInput" placeholder="username" v-model="username">
-            <label for="floatingInput">Username</label>
+            <input type="text" class="form-control" id="floatingInput" placeholder="Name" v-model="name">
+            <label for="floatingInput">Name</label>
           </div>
           <div class="form-floating mb-3">
             <input type="email" class="form-control" id="floatingEmail" placeholder="name@example.com" v-model="email">
@@ -89,7 +106,16 @@ const handleAction = () => {
           
           <p v-if="errorMessage" class="text-danger">{{ errorMessage }}</p>
 
-          <button class="btn btn-primary w-100 py-2" type="submit">Place an order</button>
+          <button class="btn btn-primary w-100 py-2" type="submit" :disabled="!authStore.loggedIn">Place an order</button>
+          <p v-if="!authStore.loggedIn" class="text-warning">You need to be logged in to place an order</p>
         </form>
+    </BContainer>
+    <BContainer v-else>
+        <div v-if="successMessage" class="alert alert-success text-center" role="alert">
+          {{ successMessage }}
+        </div>
+        <div v-else>
+            <h1 class="text-center">No products in order</h1>
+        </div>
     </BContainer>
 </template>

@@ -17,10 +17,12 @@ import { faHouse,
     faUserPlus,
     faCartShopping,
     faCartPlus,
-    faXmark } from '@fortawesome/free-solid-svg-icons'
+    faXmark, 
+    faMinus,
+    faPlus } from '@fortawesome/free-solid-svg-icons'
 
 // Add icons to the library
-library.add(faHouse, faSignInAlt, faSignOutAlt, faUserPlus, faCartShopping, faCartPlus, faXmark)
+library.add(faHouse, faSignInAlt, faSignOutAlt, faUserPlus, faCartShopping, faCartPlus, faXmark, faPlus, faMinus)
 
 
 const app = createApp(App)

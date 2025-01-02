@@ -57,8 +57,8 @@ const creatOrders = async (req, res) => {
             }
         }
 
-        if (check !== products.length) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Produkty nie istnieją w bazie" });
+        if (!customer_name || !email || !phone || !status_id || !Array.isArray(products) || products.length === 0) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Wypełnij wszystkie pola formularzu" });
         }
 
         const phoneRegex = /^[0-9]+$/;
@@ -66,14 +66,14 @@ const creatOrders = async (req, res) => {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Numer telefonu zawiera nieprawidłowe znaki." });
         }
 
-        if (!customer_name || !email || !phone || !status_id || !Array.isArray(products) || products.length === 0) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Brakuje wymaganych danych zamówienia lub lista produktów jest pusta." });
-        }
-
         for (const product of products) {
             if (!product.product_id || !product.quantity || product.quantity <= 0 || product.quantity !== Math.floor(product.quantity)) {
                 return res.status(StatusCodes.BAD_REQUEST).json({ message: "Nieprawidłowy format danych produktu." });
             }
+        }
+
+        if (check !== products.length) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Produkty nie istnieją w bazie" });
         }
 
         const [orderId] = await knex('orders').insert({

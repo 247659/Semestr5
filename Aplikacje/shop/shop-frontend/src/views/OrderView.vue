@@ -6,7 +6,7 @@ const message = ref('Hello World!')
 </script>
 
 <template>
-  <div class="d-flex justify-content-center align-items-center vh-100 order-view-container">
+  <div class="d-flex justify-content-center align-items-center order-view-container">
     <div>
         <OrderComponent/>
     </div>

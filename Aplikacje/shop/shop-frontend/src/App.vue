@@ -48,14 +48,14 @@ onMounted(() => {
 </template>
 
 <style>
-  .navbar {
-  height: 60px; /* Przykładowa wysokość */
+  /* .navbar {
+  height: 60px;
   background-color: #333;
   color: white;
   display: flex;
   align-items: center;
   padding: 0 20px;
-}
+} */
 
 .order-view-container {
   margin-top: 100px; /* Dopasuj do wysokości navbar */
