@@ -2,4 +2,3 @@ node_modules/
 .history/
 .idea/
 .DS_Store
-.env
