@@ -26,8 +26,8 @@ const handleLogin = async () => {
     password: password.value
   }
   try {
-    const response = await axios.post('http://localhost:8888/auth/login', userData)
-    authStore.setAccessToken(response.data.accessToken)
+    const response = await axios.post('http://localhost:8888/auth/login', userData, { withCredentials: true })
+    authStore.setAccessToken(response.data.message)
     router.push('/');
   } catch (error) {
     if (error.response && error.response.data && error.response.data.message) {

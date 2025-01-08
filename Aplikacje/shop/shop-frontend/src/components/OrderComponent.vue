@@ -36,11 +36,11 @@ const handleOrder = async () => {
         }))
     }
   try {
-    const response = await axios.post('http://localhost:8888/orders', orderData, {
-        headers: {
-        Authorization: `Bearer ${authStore.accessToken}`
-      }
-    })
+    const response = await axios.post(
+        'http://localhost:8888/orders',
+        orderData,
+        { withCredentials: true } // Umożliwia przesyłanie ciasteczek
+    );
     successMessage.value = response.data.message
     orderStore.clearOrder()
   } catch (error) {

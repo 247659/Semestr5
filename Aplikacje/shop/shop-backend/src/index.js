@@ -1,6 +1,7 @@
 require('dotenv').config({ path: '../.env' });
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
@@ -9,6 +10,8 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Dopuszczalne metody
     credentials: true, // Jeśli potrzebujesz ciasteczek lub nagłówków autoryzacji
   }));
+
+app.use(cookieParser());
 const productRoutes = require('./routes/productRoutes');
 const ordersRoutes = require('./routes/orderRoutes');
 const categoriesRoutes = require('./routes/categoriesRoutes');

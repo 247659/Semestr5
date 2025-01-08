@@ -31,12 +31,7 @@ const creatOrders = async (req, res) => {
         if (!status_id) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nie znaleziono statusu "UNCONFIRMED".' });
         }
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Brak tokenu autoryzacyjnego.' });
-        }
-
-        const token = authHeader.split(' ')[1];
+        const token = req.cookies.accessToken;
         const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
         const userId = decoded.id;
 

@@ -3,6 +3,7 @@ const knex = require('knex')(require('../../knexfile').development);
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+
 const register = async (req, res) => {
     const { username, password, role } = req.body;
 
@@ -43,7 +44,14 @@ const login = async (req, res) => {
         const accessToken = jwt.sign({ id: user.id, username: user.username, role: user.role }, process.env.TOKEN_SECRET, { expiresIn: 86400 });
         const refreshToken = jwt.sign({ id: user.id, username: user.username, role: user.role }, process.env.TOKEN_REFRESH_SECRET, { expiresIn: 525600 });
 
-        res.status(StatusCodes.OK).json({ accessToken, refreshToken });
+        res.cookie('accessToken', accessToken, {
+            maxAge: 86400000,
+            httpOnly: true,
+        }).cookie('refreshToken', refreshToken, {
+            maxAge: 525600000,
+            httpOnly: true,
+        })
+        res.status(StatusCodes.OK).json({ message: 'Zalogowano' });
     } catch (error) {
         console.error(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera.' });
