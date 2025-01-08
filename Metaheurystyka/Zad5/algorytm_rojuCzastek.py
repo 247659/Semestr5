@@ -20,7 +20,8 @@ class Particle:
         self.personal_best_score = float('inf')
 
     def update_velocity(self, global_best_position, i, ws, wp):
-        r1, r2 = np.random.rand(2)
+        r1 = np.random.uniform(0, 1)
+        r2 = np.random.uniform(0, 1)
         self.velocity = (
                 i * self.velocity
                 + wp * r1 * (self.personal_best_position - self.position)
@@ -39,14 +40,17 @@ class Particle:
             self.personal_best_position = np.copy(self.position)
 
 
-def particle_swarm_optimization(num_particles, num_iterations, bounds, i, wp, ws, func):
-    # Inicjalizacja roju cząstek
+def particle_swarm_optimization(num_particles, bounds, i, wp, ws, func):
     particles = [Particle(bounds) for _ in range(num_particles)]
 
+    improvement = 0
+    iteration = 0
     global_best_position = np.zeros(2)
     global_best_score = float('inf')
+    previous_global_best_score = float('inf')
 
-    for iteration in range(num_iterations):
+    while True:
+        iteration += 1
         for particle in particles:
             particle.adaptation(func)
 
@@ -57,19 +61,28 @@ def particle_swarm_optimization(num_particles, num_iterations, bounds, i, wp, ws
             particle.update_velocity(global_best_position, i, wp, ws)
             particle.update_position(bounds)
 
-        print(f"Iteracja {iteration + 1}/{num_iterations}, Najlepszy wynik: {global_best_score}")
+        print(f"Iteracja {iteration}, Najlepszy wynik: {global_best_score}")
+
+        if global_best_score < previous_global_best_score:
+            previous_global_best_score = global_best_score
+            improvement = 0
+        else:
+            improvement += 1
+
+        if improvement >= 30:
+            break
 
     return global_best_position, global_best_score
 
 
 if __name__ == "__main__":
-    best_position, best_score = particle_swarm_optimization(num_particles=50, num_iterations=100,
+    best_position, best_score = particle_swarm_optimization(num_particles=50,
                                                             bounds=([-10, 10], [-10, 10]), i=0.2, wp=1, ws=1,
                                                             func=function)
     print(f"Najlepsza pozycja: {best_position}")
     print(f"Najlepszy wynik: {best_score}")
 
-    best_position, best_score = particle_swarm_optimization(num_particles=50, num_iterations=100,
+    best_position, best_score = particle_swarm_optimization(num_particles=50,
                                                             bounds=([-1.5, 4], [-3, 4]), i=0.2, wp=1, ws=1,
                                                             func=function2)
     print(f"Najlepsza pozycja: {best_position}")
