@@ -26,7 +26,7 @@ public class UserInfo {
     private String surname;
 
     @NotBlank
-    @Size(min = 11, max = 11, message = "PESEL has to have 11 letters")
+    @Size(max = 11)
     @Column(name = "pesel")
     private String pesel;
 

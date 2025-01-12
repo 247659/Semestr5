@@ -1,7 +1,9 @@
 import numpy as np
 
+
 def function(x, y):
-    return np.cos(x) * -1 * np.cos(y) * np.exp(-1*((x-np.pi)**2 + (y-np.pi)**2))
+    return -np.cos(x) * np.cos(y) * np.exp(-((x - np.pi) ** 2 + (y - np.pi) ** 2))
+
 
 def function2(x, y):
     return np.sin(x + y) + (x - y) ** 2 - 1.5 * x + 2.5 * y + 1
@@ -59,6 +61,7 @@ def particle_swarm_optimization(num_particles, bounds, i, wp, ws, func):
             particle.update_velocity(global_best_position, i, wp, ws)
             particle.update_position(bounds)
 
+        print(f"Iteracja {iteration}, Najlepszy wynik: {global_best_score}")
 
         if global_best_score < previous_global_best_score:
             previous_global_best_score = global_best_score
@@ -67,7 +70,6 @@ def particle_swarm_optimization(num_particles, bounds, i, wp, ws, func):
             improvement += 1
 
         if improvement >= 30:
-            print(f"Iteracja {iteration}")
             break
 
     return global_best_position, global_best_score

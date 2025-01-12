@@ -74,7 +74,7 @@ public class UserService implements IUserService {
 
     public void fillAuthorityInformation(String username, AuthorityDataRequest request) {
         User user = userRepository.findByUsername(username).orElseThrow(()
-                -> new RuntimeException("Authority not found"));
+                -> new RuntimeException("Organization not found"));
 
         UserInfo userInfo = userInfoRepository.findByUser(user).orElseGet(()
                 -> {
@@ -93,6 +93,7 @@ public class UserService implements IUserService {
         userInfo.setSurname(request.getSurname());
         userInfo.setPesel(request.getPesel());
         userInfo.setPosition(request.getPosition());
+        userInfoRepository.save(userInfo);
 
         try {
             EUserRoles role = EUserRoles.valueOf(request.getRole());
@@ -100,8 +101,6 @@ public class UserService implements IUserService {
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid role provided: " + request.getRole());
         }
-
-        userInfoRepository.save(userInfo);
     }
 
     public void fillUserInformation(String username, FillDataRequest request) {

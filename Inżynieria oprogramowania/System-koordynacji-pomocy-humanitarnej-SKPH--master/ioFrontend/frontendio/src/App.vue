@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <nav class="navbar navbar-expand navbar-dark bg-dark">
-      <a href="/" class="navbar-brand">bezKoder</a>
+      <a href="/" class="navbar-brand">SKPH</a>
       <div class="navbar-nav mr-auto">
         <li class="nav-item">
           <router-link to="/home" class="nav-link">
@@ -16,6 +16,12 @@
         </li>
         <li class="nav-item">
           <router-link v-if="currentUser" to="/user" class="nav-link">User</router-link>
+        </li>
+        <li class="nav-item">
+          <router-link to="/communication" class="nav-link">Chat</router-link>
+        </li>
+        <li class="nav-item">
+          <router-link to="/map" class="nav-link">Map</router-link>
         </li>
       </div>
 
@@ -79,26 +85,6 @@ export default {
       this.$store.dispatch('auth/logout');
       this.$router.push('/login');
     }
-  },
-  // Użytkownik od razu zalogowany testing
-  mounted() {
-    const user = {
-    username: 'testowy',
-    email: 'testowy@email.com',
-    roles: ['ROLE_USER'],
-    accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiYWRtaW4iLCJpZCI6MTIzNDU2Nzg5MCwiZXhwIjoxNjE4NTE3MjAwfQ.M9A5M8FzDbuwyfdH1MvDCbUe8kbbVqaBq9TTjT27SxI', // Zastąp to rzeczywistym tokenem, jeśli chcesz
-  };
-
-  // Ustawienie użytkownika w Vuex bez potrzeby logowania
-  this.$store.commit('auth/loginSuccess', user);
-
-  // Opcjonalnie, jeśli używasz Axios, ustawienie nagłówków
-  axios.defaults.headers.common['Authorization'] = 'Bearer ' + user.accessToken;
-
-  // Przekierowanie na stronę profilową
-  if (!this.$route.path.includes('/profile')) {
-    this.$router.push('/profile');
   }
-},
 };
 </script>

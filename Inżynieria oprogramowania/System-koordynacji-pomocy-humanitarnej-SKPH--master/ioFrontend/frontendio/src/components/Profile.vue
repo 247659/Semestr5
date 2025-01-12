@@ -22,7 +22,6 @@
       <li v-for="role in currentUser.roles" :key="role">{{role}}</li>
     </ul>
 
-    <!-- Przycisk do wyświetlania formularza -->
     <button @click="toggleForm" class="btn btn-primary">
       {{ showForm ? "Ukryj" : "Wypełnij dane o profilu" }}
     </button>
@@ -75,8 +74,7 @@ export default {
   mounted() {
     if (!this.currentUser) {
       this.$router.push('/login');
-    } 
-    console.log('Current User:', this.currentUser);
+    }
   },
   methods: {
     toggleForm() {
@@ -86,13 +84,15 @@ export default {
         const requestData = {
           name: this.name,
           surname: this.surname,
-          pesel: this.pesel
+          pesel: this.pesel,
+          role: 'ROLE_VICTIM'
         };
         console.log('Current User:', this.currentUser.username);
         UserService.fillUserInformation(this.currentUser.username, requestData)
-          .then(updatedUser => {
-            this.updatedUser = updatedUser;
-            this.error = null;
+          .then(response => {
+            console.log(response.data)
+            // this.updatedUser = updatedUser;
+            // this.error = null;
           })
           .catch(error => {
             this.error = error.response ? error.response.data : 'Nieznany błąd';
@@ -104,7 +104,7 @@ export default {
 </script>
 
 <style scoped>
-.form-container {
+  .form-container {
   margin-top: 20px;
   padding: 15px;
   border: 1px solid #ccc;

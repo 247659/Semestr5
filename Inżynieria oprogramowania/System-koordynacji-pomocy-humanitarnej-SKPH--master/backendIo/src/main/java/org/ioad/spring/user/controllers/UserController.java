@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/test")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class UserController {
 
@@ -58,6 +58,7 @@ public class UserController {
     @PostMapping("/{username}/uploadUser-data")
     public ResponseEntity<String> fillUserInformation(@PathVariable String username,
                                                              @RequestBody FillDataRequest request) {
+        System.out.println("Print1");
         userService.fillUserInformation(username, request);
         return ResponseEntity.ok("Successfully added information about user");
     }
