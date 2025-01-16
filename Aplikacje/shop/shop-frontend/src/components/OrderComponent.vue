@@ -36,6 +36,7 @@ const handleOrder = async () => {
         }))
     }
   try {
+    console.log(orderData)
     const response = await axios.post(
         'http://localhost:8888/orders',
         orderData,
@@ -56,6 +57,7 @@ const handleOrder = async () => {
 </script>
 
 <template>
+  <div>
     <BContainer v-if:="products.length > 0">
         <BTable :items="products" :fields="fields" striped bordered hover>
             <template #cell(name)="data">
@@ -110,7 +112,7 @@ const handleOrder = async () => {
           <p v-if="!authStore.loggedIn" class="text-warning">You need to be logged in to place an order</p>
         </form>
     </BContainer>
-    <BContainer v-else>
+    <BContainer v-else:>
         <div v-if="successMessage" class="alert alert-success text-center" role="alert">
           {{ successMessage }}
         </div>
@@ -118,4 +120,5 @@ const handleOrder = async () => {
             <h1 class="text-center">No products in order</h1>
         </div>
     </BContainer>
+  </div>
 </template>

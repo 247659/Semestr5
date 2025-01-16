@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { RouterLink, RouterView} from 'vue-router'
-import { BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav, BNavItem, vBColorMode } from 'bootstrap-vue-next'
+import { BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav, BNavItem, vBColorMode, BNavItemDropdown, BDropdownItem } from 'bootstrap-vue-next'
 import { useAuthStore } from './stores/auth'
 import { useOrderStore } from './stores/order';
 
@@ -33,18 +33,25 @@ onMounted(() => {
           <RouterLink v-if="!authStore.loggedIn" to="/signIn" class="nav-link">
             <font-awesome-icon icon="fa-solid fa-sign-in-alt" class="me-2"/>Sign In
           </RouterLink>
-          <RouterLink v-else to="/" class="nav-link" @click="authStore.setAccessToken(null)">
-            <font-awesome-icon icon="fa-solid fa-sign-out-alt" class="me-2"/>Sign Out
-          </RouterLink>
+          <BNavItemDropdown v-else text="Username">
+            <template #button-content>
+              <font-awesome-icon icon="fa-solid fa-user" /> Username
+            </template>
+            <RouterLink  to="/user_orders" class="nav-link">
+              <font-awesome-icon icon="fa-solid fa-receipt" class="me-2"/>Orders
+            </RouterLink>
+            <RouterLink  to="/" class="nav-link" @click="authStore.setAccessToken(null)">
+              <font-awesome-icon icon="fa-solid fa-sign-out-alt" class="me-2"/>Sign Out
+            </RouterLink>
+          </BNavItemDropdown> 
           <RouterLink to="/register" class="nav-link">
             <font-awesome-icon icon="fa-solid fa-user-plus" class="me-2"/>Register
           </RouterLink>
         </BNavbarNav>
       </BCollapse>
     </BNavbar>
+    <RouterView />
   </div>
-  
-  <RouterView />
 </template>
 
 <style>

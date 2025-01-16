@@ -180,10 +180,16 @@ const getOrderById = async (req, res) => {
 };
 
 const getOrderByCustomer = async (req, res) => {
-    const { customer_name } = req.params;
-
     try {
-        const orders = await knex('orders').select('*').where({ customer_name });
+        const token = req.cookies.accessToken;
+        if (!token) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Brak tokenu uwierzytelniającego.' });
+        }
+        
+        const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+        const userID = decoded.id;
+
+        const orders = await knex('orders').select('*').where({ user_id: userID });
         if (orders.length === 0) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: `Zamówienie, którego kupującym jest ${customer_name} nie istnieje.` });
         }
