@@ -56,7 +56,7 @@ const handleAction = (item) => {
 </script>
 
 <template>
-    <BContainer>
+    <BContainer >
         <BRow>
             <BCol lg="4" class="my-1">
                 <BFormGroup>
@@ -88,8 +88,11 @@ const handleAction = (item) => {
                 <BButton size="sm" class="me-1"  @click="handleAction(data.item)">
                     <font-awesome-icon icon="fa-solid fa-cart-plus" /> Add to card
                 </BButton>
-                <BButton size="sm" @click="data.toggleDetails">
+                <BButton size="sm" class="me-1" @click="data.toggleDetails">
                 {{ data.detailsShowing ? 'Hide' : 'Show' }} Details
+                </BButton>
+                <BButton size="sm">
+                {{ data.detailsShowing ? 'Cancel' : 'Update' }}
                 </BButton>
             </template>
             <template #row-details="data">

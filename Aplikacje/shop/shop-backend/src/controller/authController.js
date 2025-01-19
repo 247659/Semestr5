@@ -51,7 +51,7 @@ const login = async (req, res) => {
             maxAge: 525600000,
             httpOnly: true,
         })
-        res.status(StatusCodes.OK).json({ message: 'Zalogowano' });
+        res.status(StatusCodes.OK).json({ message: 'Zalogowano', role: user.role });
     } catch (error) {
         console.error(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera.' });
