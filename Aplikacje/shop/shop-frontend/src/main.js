@@ -5,6 +5,8 @@ import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
 import {createBootstrap} from 'bootstrap-vue-next'
+import Toast from 'vue-toastification';
+import "vue-toastification/dist/index.css";
 
 // Add the necessary CSS
 import 'bootstrap/dist/css/bootstrap.css'
@@ -31,5 +33,6 @@ const pinia = createPinia()
 app.use(router)
 app.use(pinia)
 app.use(createBootstrap())
+.use(Toast)
 app.component('font-awesome-icon', FontAwesomeIcon)
 app.mount('#app')

@@ -224,15 +224,15 @@ const creatOpinion = async (req, res) => {
     const { rating, content } = req.body; // Pobieranie danych opinii z ciała żądania
 
     try {
-        if (!rating || !content || typeof rating !== 'number' || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+        if (!rating || !content  || !Number.isInteger(parseInt(rating)) || parseInt(rating) < 1 || parseInt(rating) > 5) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nieprawidłowe dane opinii. Ocena powinna być liczbą całkowitą od 1 do 5, a treść opinii nie może być pusta.' });
         }
 
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Brak tokenu autoryzacyjnego." });
+        const token = req.cookies.accessToken;
+        if (!token) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Brak tokenu uwierzytelniającego.' });
         }
-        const token = authHeader.split(' ')[1];
+        
         const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
         const userId = decoded.id;
 

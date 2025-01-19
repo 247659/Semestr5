@@ -1,7 +1,7 @@
 <script setup>
 import axios from 'axios'
 import { ref, onMounted, computed } from 'vue'
-import { BTable, BFormSelect, BContainer, BRow, BCol, BFormGroup, BInputGroup, BFormInput, BInputGroupText, BButton} from 'bootstrap-vue-next'
+import { BTable, BFormSelect, BContainer, BRow, BCol, BFormGroup, BInputGroup, BFormInput, BInputGroupText, BButton, BCard} from 'bootstrap-vue-next'
 import { useOrderStore } from '../stores/order'
 
 const orderStore = useOrderStore()
@@ -13,7 +13,6 @@ const selectedCategory = ref('')
 
 const fields = [
   { key: 'name', label: 'Name' },
-  { key: 'description', label: 'Description' },
   { key: 'unit_price', label: 'Price' },
   { key: 'unit_weight', label: 'Weight' },
   { key: 'actions', label: 'Actions', class: 'text-center' }
@@ -79,9 +78,6 @@ const handleAction = (item) => {
             <template #cell(name)="data">
                 {{ data.item.name }}
             </template>
-            <template #cell(description)="data">
-                {{ data.item.description }}
-            </template>
             <template #cell(unit_price)="data">
                 ${{ data.item.unit_price }}
             </template>
@@ -89,9 +85,17 @@ const handleAction = (item) => {
                 {{ data.item.unit_weight }}
             </template>
             <template #cell(actions)="data">
-                <BButton size="sm" variant="primary" @click="handleAction(data.item)">
+                <BButton size="sm" class="me-1"  @click="handleAction(data.item)">
                     <font-awesome-icon icon="fa-solid fa-cart-plus" /> Add to card
                 </BButton>
+                <BButton size="sm" @click="data.toggleDetails">
+                {{ data.detailsShowing ? 'Hide' : 'Show' }} Details
+                </BButton>
+            </template>
+            <template #row-details="data">
+                <BCard>
+                    <p>{{ data.item.description }}</p>
+                </BCard>
             </template>
         </BTable>
     </BContainer>

@@ -38,7 +38,7 @@ onMounted(() => {
               <font-awesome-icon icon="fa-solid fa-user" /> Username
             </template>
             <RouterLink  to="/user_orders" class="nav-link">
-              <font-awesome-icon icon="fa-solid fa-receipt" class="me-2"/>Orders
+              <font-awesome-icon icon="fa-solid fa-receipt" class="me-2"/>Your orders
             </RouterLink>
             <RouterLink  to="/" class="nav-link" @click="authStore.setAccessToken(null)">
               <font-awesome-icon icon="fa-solid fa-sign-out-alt" class="me-2"/>Sign Out
