@@ -154,7 +154,7 @@ const updateOrders = async (req, res) => {
             .update({ status_id: status.id, confirmed_date: confirmationDate});
 
         res.status(StatusCodes.OK).json({
-            message: `Stan zamówienia o ID ${id} został zmieniony na "${newStatus}".`
+            message: `Stan zamówienia o ID ${id} został zmieniony na ${newStatus}.`
         });
     } catch (err) {
         console.error(err);

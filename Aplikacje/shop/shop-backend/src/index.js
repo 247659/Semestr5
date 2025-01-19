@@ -7,7 +7,7 @@ const app = express();
 
 app.use(cors({
     origin: 'http://localhost:5173', // Adres Twojego frontendu
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Dopuszczalne metody
+    methods: ['GET', 'POST', 'PUT', 'DELETE', "PATCH"], // Dopuszczalne metody
     credentials: true, // Jeśli potrzebujesz ciasteczek lub nagłówków autoryzacji
   }));
 

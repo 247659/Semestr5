@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import OrderComponent from '../components/OrderComponent.vue'
+import OrderComponent from '../components/MakeOrderComponent.vue'
 
 const message = ref('Hello World!')
 </script>

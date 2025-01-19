@@ -54,7 +54,7 @@ const handleLogout = async () => {
               <font-awesome-icon icon="fa-solid fa-user" /> {{authStore.username}}
             </template>
             <RouterLink  to="/user_orders" class="nav-link">
-              <font-awesome-icon icon="fa-solid fa-receipt" class="me-2"/>Your orders
+              <font-awesome-icon icon="fa-solid fa-receipt" class="me-2"/> {{ authStore.role === 'KLIENT' ? 'Your orders' : 'Check orders' }}
             </RouterLink>
             <RouterLink  to="/" class="nav-link" @click="handleLogout">
               <font-awesome-icon icon="fa-solid fa-sign-out-alt" class="me-2"/>Sign Out
