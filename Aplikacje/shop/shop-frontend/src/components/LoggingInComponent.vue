@@ -26,18 +26,13 @@ const handleLogin = async () => {
     password: password.value
   }
   try {
-    const response = await axios.post('http://localhost:8888/auth/login', userData, { withCredentials: true })
-    // authStore.setAccessToken(response.data.message)
-    authStore.login(response.data.role)
-    console.log(response.data)
-    router.push('/');
-  } catch (error) {
-    if (error.response && error.response.data && error.response.data.message) {
-      errorMessage.value = error.response.data.message
+    const response = await authStore.login(userData);
+    if (response) {
+      errorMessage.value = response
     } else {
-      errorMessage.value = 'Błąd połączenia z serwerem.'
+      router.push('/')
     }
-    
+  } catch (error) {
     console.error(error);
   }
 };

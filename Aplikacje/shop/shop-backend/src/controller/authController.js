@@ -41,25 +41,30 @@ const login = async (req, res) => {
             return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Nieprawidłowe dane logowania.' });
         }
 
-        const accessToken = jwt.sign({ id: user.id, username: user.username, role: user.role }, process.env.TOKEN_SECRET, { expiresIn: 86400 });
-        const refreshToken = jwt.sign({ id: user.id, username: user.username, role: user.role }, process.env.TOKEN_REFRESH_SECRET, { expiresIn: 525600 });
+        const accessToken = jwt.sign({ id: user.id, username: user.username, role: user.role }, process.env.TOKEN_SECRET, { expiresIn: 300 });
+        const refreshToken = jwt.sign({ id: user.id, username: user.username, role: user.role }, process.env.TOKEN_REFRESH_SECRET, { expiresIn: 3600 });
 
         res.cookie('accessToken', accessToken, {
-            maxAge: 86400000,
+            maxAge: 300000,
             httpOnly: true,
         }).cookie('refreshToken', refreshToken, {
-            maxAge: 525600000,
+            maxAge: 3600000,
             httpOnly: true,
         })
-        res.status(StatusCodes.OK).json({ message: 'Zalogowano', role: user.role });
+        res.status(StatusCodes.OK).json({ message: 'Zalogowano', role: user.role, username: user.username, expiresIn: 300 });
     } catch (error) {
         console.error(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera.' });
     }
 };
 
+const logout = async (req, res) => {
+    res.clearCookie('accessToken').clearCookie('refreshToken');
+    res.status(StatusCodes.OK).json({ message: 'Logout successfully!' });
+}
+
 const refresh = async (req, res) => {
-    const { refToken } = req.body;
+    const refToken = req.cookies.refreshToken;
 
     if (!refToken) return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Brak tokenu.' });
 
@@ -67,8 +72,12 @@ const refresh = async (req, res) => {
         const decoded = jwt.verify(refToken, process.env.TOKEN_REFRESH_SECRET);
 
         const { id, username, role } = decoded;
-        const accessToken = jwt.sign({ id: id, username: username, role: role }, process.env.TOKEN_SECRET, { expiresIn: 86400 });
-        res.status(StatusCodes.OK).json({ accessToken});
+        const accessToken = jwt.sign({ id: id, username: username, role: role }, process.env.TOKEN_SECRET, { expiresIn: 300 });
+        res.cookie('accessToken', accessToken, {
+            maxAge: 300000,
+            httpOnly: true,
+        })
+        res.status(StatusCodes.OK).json({ message: 'Token odświeżony', expiresIn: 300 });
     } catch (err) {
         return res.sendStatus(StatusCodes.FORBIDDEN);
     }
@@ -77,4 +86,4 @@ const refresh = async (req, res) => {
 
 };
 
-module.exports = {register, login, refresh};
+module.exports = {register, login, refresh, logout};

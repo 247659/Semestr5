@@ -1,20 +1,37 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { RouterLink, RouterView} from 'vue-router'
 import { BNavbar, BNavbarBrand, BNavbarToggle, BCollapse, BNavbarNav, BNavItem, vBColorMode, BNavItemDropdown, BDropdownItem } from 'bootstrap-vue-next'
 import { useAuthStore } from './stores/auth'
 import { useOrderStore } from './stores/order';
+import { useToast } from 'vue-toastification';
 
 const authStore = useAuthStore()
 const orderStore = useOrderStore()
+const toast = useToast();
+const logoutMessage = ref('')
 
 onMounted(() => {
-  // Sprawdź, czy token istnieje w localStorage (np. po odświeżeniu strony)
-  const token = localStorage.getItem('accessToken');
-  if (token) {
-    authStore.setAccessToken(token)
+  if (localStorage.getItem('loggedIn')) {
+    console.log("dddd")
+    authStore.loggedIn = localStorage.getItem('loggedIn')
+    authStore.username = localStorage.getItem('username')
+    authStore.role = localStorage.getItem("role")
+    authStore.scheduleTokenRefresh(Number(localStorage.getItem('expiresIn')))
   }
-});
+
+}); 
+
+const handleLogout = async () => {
+      try {
+        const response = await authStore.logout();
+        logoutMessage.value = response;
+        toast.success(logoutMessage.value);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
 </script>
 
 <template>
@@ -35,12 +52,12 @@ onMounted(() => {
           </RouterLink>
           <BNavItemDropdown v-else text="Username">
             <template #button-content>
-              <font-awesome-icon icon="fa-solid fa-user" /> Username
+              <font-awesome-icon icon="fa-solid fa-user" /> {{authStore.username}}
             </template>
             <RouterLink  to="/user_orders" class="nav-link">
               <font-awesome-icon icon="fa-solid fa-receipt" class="me-2"/>Your orders
             </RouterLink>
-            <RouterLink  to="/" class="nav-link" @click="authStore.logout()">
+            <RouterLink  to="/" class="nav-link" @click="handleLogout">
               <font-awesome-icon icon="fa-solid fa-sign-out-alt" class="me-2"/>Sign Out
             </RouterLink>
           </BNavItemDropdown> 
