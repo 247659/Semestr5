@@ -13,7 +13,6 @@ const logoutMessage = ref('')
 
 onMounted(() => {
   if (localStorage.getItem('loggedIn')) {
-    console.log("dddd")
     authStore.loggedIn = localStorage.getItem('loggedIn')
     authStore.username = localStorage.getItem('username')
     authStore.role = localStorage.getItem("role")

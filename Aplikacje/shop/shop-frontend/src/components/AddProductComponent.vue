@@ -71,7 +71,7 @@ const submitForm = async () => {
         <BFormGroup label="Price" label-for="unit_price">
           <BFormInput id="unit_price" v-model="unit_price" type="number" required placeholder="$$"/>
         </BFormGroup>
-        <BFormGroup label="Weight" label-for="unit_weight">
+        <BFormGroup label="Weight[KG]" label-for="unit_weight">
           <BFormInput id="unit_weight" v-model="unit_weight" type="number" required placeholder="KG"/>
         </BFormGroup>
         <BFormGroup label="Category" label-for="category_id">
