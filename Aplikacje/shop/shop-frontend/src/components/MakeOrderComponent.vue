@@ -113,8 +113,17 @@ const handleOrder = async () => {
         </form>
     </BContainer>
     <BContainer v-else:>
-        <div v-if="successMessage" class="alert alert-success text-center" role="alert">
+        <div v-if="successMessage" >
+          <div class="alert alert-success text-center" role="alert">
           {{ successMessage }}
+          </div>
+          <div>
+          <BButton>
+            <RouterLink  to="/user_orders" class="nav-link">
+              <font-awesome-icon icon="fa-solid fa-receipt" class="me-2"/> Check your orders here
+            </RouterLink>
+          </BButton>
+        </div>
         </div>
         <div v-else>
             <h1 class="text-center">No products in order</h1>

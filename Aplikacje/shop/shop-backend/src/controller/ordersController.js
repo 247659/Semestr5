@@ -10,11 +10,15 @@ const getOrder = async (req, res) => {
         const orders = await knex('orders')
         .join('order_items', 'orders.id', '=', 'order_items.order_id')
         .join('products', 'order_items.product_id', '=', 'products.id')
+        .leftJoin('opinions', 'orders.id', '=', 'opinions.order_id') 
         .select(
-          'orders.*',
-          'products.name',
-          'order_items.quantity',
-          'order_items.unit_price' 
+            'orders.*',
+            'products.name',
+            'order_items.quantity',
+            'order_items.unit_price',
+            'opinions.content',
+            'opinions.opinion_date',
+            'opinions.rating'    
         );
         res.json(orders);
     } catch (error) {
@@ -177,11 +181,15 @@ const getOrderById = async (req, res) => {
         const orders = await knex('orders')
         .join('order_items', 'orders.id', '=', 'order_items.order_id')
         .join('products', 'order_items.product_id', '=', 'products.id')
+        .leftJoin('opinions', 'orders.id', '=', 'opinions.order_id') 
         .select(
-          'orders.*',
-          'products.name',
-          'order_items.quantity',
-          'order_items.unit_price' 
+            'orders.*',
+            'products.name',
+            'order_items.quantity',
+            'order_items.unit_price',
+            'opinions.content',
+            'opinions.opinion_date',
+            'opinions.rating'    
         ).where('orders.id', id);
         if (orders.length === 0) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: `Zamówienie o ID ${id} nie istnieje.` });
@@ -208,11 +216,15 @@ const getOrderByCustomer = async (req, res) => {
         const orders = await knex('orders')
         .join('order_items', 'orders.id', '=', 'order_items.order_id')
         .join('products', 'order_items.product_id', '=', 'products.id')
+        .leftJoin('opinions', 'orders.id', '=', 'opinions.order_id') 
         .select(
-          'orders.*',
-          'products.name',
-          'order_items.quantity',
-          'order_items.unit_price' 
+            'orders.*',
+            'products.name',
+            'order_items.quantity',
+            'order_items.unit_price',
+            'opinions.content',
+            'opinions.opinion_date',
+            'opinions.rating'    
         ).where({ user_id: userID });
         if (orders.length === 0) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: `Zamówienie, którego kupującym jest ${customer_name} nie istnieje.` });
@@ -233,11 +245,15 @@ const getOrderByStatus = async (req, res) => {
         const orders = await knex('orders')
         .join('order_items', 'orders.id', '=', 'order_items.order_id')
         .join('products', 'order_items.product_id', '=', 'products.id')
+        .leftJoin('opinions', 'orders.id', '=', 'opinions.order_id') 
         .select(
-          'orders.*',
-          'products.name',
-          'order_items.quantity',
-          'order_items.unit_price' 
+            'orders.*',
+            'products.name',
+            'order_items.quantity',
+            'order_items.unit_price',
+            'opinions.content',
+            'opinions.opinion_date',
+            'opinions.rating'    
         ).where({ status_id });
         if (orders.length === 0) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: `Zamówienie o statusie ${status_id} nie istnieje.` });
@@ -295,10 +311,16 @@ const creatOpinion = async (req, res) => {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Opinię można dodać tylko do zamówienia, które jest ZREALIZOWANE lub ANULOWANE.' });
         }
 
+        let confirmationDate;
+        if (allowedStatuses.includes(orderStatus.name)) {
+            confirmationDate = moment().format('YYYY-MM-DD HH:mm:ss');
+        }
+
         const [newOpinionId] = await knex('opinions').insert({
             order_id: id,
             rating,
-            content
+            content,
+            opinion_date: confirmationDate
         });
 
         res.status(StatusCodes.CREATED).json({ message: 'Opinia została dodana.', opinion_id: newOpinionId });

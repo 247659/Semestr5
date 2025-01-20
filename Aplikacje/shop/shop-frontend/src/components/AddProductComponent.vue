@@ -57,6 +57,9 @@ const submitForm = async () => {
 
 <template>
   <div>
+    <BButton class="add-product-file" variant="primary">
+        Load file
+    </BButton>
     <BButton @click="toggleForm" class="add-product-button" variant="primary">
       {{ showForm ? 'Close' : 'Add Product' }}
     </BButton>
@@ -87,7 +90,16 @@ const submitForm = async () => {
 .add-product-button {
   position: fixed;
   bottom: 20px;
+  width: 200px;
   right: 20px;
+  z-index: 1000;
+}
+
+.add-product-file {
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  width: 200px;
   z-index: 1000;
 }
 

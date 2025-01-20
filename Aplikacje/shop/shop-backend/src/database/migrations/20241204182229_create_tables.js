@@ -56,6 +56,7 @@ exports.up = function(knex) {
             table.increments('id').primary();
             table.integer('rating').notNullable().checkBetween([1, 5]);
             table.text('content').notNullable();
+            table.dateTime('opinion_date').nullable();
             table.integer('order_id').unsigned().notNullable()
                 .references('id').inTable('orders')
                 .onDelete('CASCADE');

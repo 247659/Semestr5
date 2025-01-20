@@ -1,12 +1,14 @@
 <script setup>
 import axios from 'axios'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { BButton, BBadge, BCard, BContainer, BRow, BCol, BFormGroup, BFormSelect } from 'bootstrap-vue-next'
 import { useToast } from 'vue-toastification';
 
 const orders = ref([]);
 const detailsVisibility = ref({});
+const opinionVisibility = ref({})
 const selectedStatus = ref(null);
+const sortBy = ref('')
 const toast = useToast();
 
 const statuses = [
@@ -49,6 +51,10 @@ const getStatus = (status_id) => {
 const toggleDetails = (itemId) => {
   detailsVisibility.value[itemId] = !detailsVisibility.value[itemId];
 };
+
+const showOpinion = (itemId) => {
+  opinionVisibility.value[itemId] = !opinionVisibility.value[itemId]
+}
 
 const showOrdersByStatus = async() => {
     console.log(orders)
@@ -108,13 +114,19 @@ const replaceOrder = (updatedOrder) => {
   }
 };
 
-function calculateTotalPrice(order) {
-    let totalPrice = 0
-    for (let product of order) {
-        totalPrice += (product.quantity * parseFloat(product.unit_price))
-    }
-    return totalPrice
+const calculateTotalPrice = (order) => {
+  return order.products.reduce((total, product) => total + product.quantity * product.unit_price, 0);
 };
+
+const sortedOrders = computed(() => {
+  if (sortBy.value === 'price') {
+    return [...orders.value].sort((a, b) => calculateTotalPrice(b) - calculateTotalPrice(a));
+  } else if (sortBy.value === 'date') {
+    return [...orders.value].sort((a, b) => new Date(b.confirmation_date) - new Date(a.confirmation_date));
+  } else {
+    return orders.value;
+  }
+});
 
 </script>
 
@@ -129,9 +141,18 @@ function calculateTotalPrice(order) {
       <BCol class="my-3">
         <BButton size="bg" variant="primary" @click="showOrdersByStatus()">Show</BButton>
       </BCol>
+      <BCol class="my-3">
+        <BFormGroup>
+          <BFormSelect id="sort-by" v-model="sortBy" :options="[
+            { value: '', text: 'Sort by...' },
+            { value: 'price', text: 'Total Price' },
+            { value: 'date', text: 'Confirmation Date' }
+          ]" />
+        </BFormGroup>
+      </BCol>
     </BRow>
     <BRow>
-      <BCol v-for="order in orders" :key="order.id" :lg="orders.length === 1 ? 12 : 6" class="mb-4">
+      <BCol v-for="order in sortedOrders" :key="order.id" :lg="orders.length === 1 ? 12 : 6" class="mb-4">
         <BCard :class="{'expanded-card': detailsVisibility[order.id]}">
           <div class="d-flex justify-content-between align-items-center">
             <h5>Order #{{ order.id }}</h5>
@@ -140,7 +161,7 @@ function calculateTotalPrice(order) {
             </BBadge>
           </div>
           <p>Confirmed Date: <strong>{{ order.confirmed_date || 'Waiting for confirmation' }}</strong></p>
-          <p>Total Price: <strong>${{ calculateTotalPrice(order.products) }}</strong></p>
+          <p>Total Price: <strong>${{ calculateTotalPrice(order) }}</strong></p>
           <div>
             <BFormGroup label="Change Status" class="mt-3">
               <BFormSelect v-model="order.newStatus" :options="statuses.map(status => ({value: status.id, text: status.text}))"/>
@@ -153,6 +174,9 @@ function calculateTotalPrice(order) {
           <div class="d-flex justify-content-between mt-3">
             <BButton size="sm" @click="toggleDetails(order.id)">
               {{ detailsVisibility[order.id] ? 'Hide' : 'Show' }} Details
+            </BButton>
+            <BButton size="sm" v-if="order.rating !== null" @click="showOpinion(order.id)">
+              {{ opinionVisibility[order.id] ? "Hide" : "Show opinion" }}
             </BButton>
           </div>
           <hr />
@@ -171,6 +195,11 @@ function calculateTotalPrice(order) {
                 </li>
                 </ul> 
             </div>
+          </div>
+          <div v-if="opinionVisibility[order.id]" class="mt-3">
+              <p>Rating: {{ order.rating }}</p>
+              <p>Opinion date: {{ order.opinion_date }}</p>
+              <p>Content: {{ order.content }}</p>
           </div>
         </BCard>
       </BCol>
