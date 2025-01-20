@@ -1,57 +1,75 @@
 <script setup>
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
-import { BButton, BBadge, BCard, BContainer, BRow, BCol, BForm, BFormGroup, BFormTextarea, BFormInput, BFormSelect} from 'bootstrap-vue-next'
+import { BButton, BBadge, BCard, BContainer, BRow, BCol, BFormGroup, BFormSelect } from 'bootstrap-vue-next'
 import { useToast } from 'vue-toastification';
 
-const orders = ref([])
-const detailsVisibility = ref({})
-const formVisibility = ref({})
-const selectedStatus = ref(null)
-const toast = useToast()
+const orders = ref([]);
+const detailsVisibility = ref({});
+const selectedStatus = ref(null);
+const toast = useToast();
 
 const statuses = [
   { id: 1, text: 'Unconfirmed', BBadgeVariant: 'warning' },
   { id: 2, text: 'Confirmed', BBadgeVariant: 'info' },
   { id: 3, text: 'Cancelled', BBadgeVariant: 'danger' },
   { id: 4, text: 'Completed', BBadgeVariant: 'success' },
-]
+];
 
 onMounted(async () => {
   try {
-    const response = await axios.get('http://localhost:8888/orders', { withCredentials: true })
-    orders.value = response.data
+    const response = await axios.get('http://localhost:8888/orders', { withCredentials: true });
+    const groupedOrders = groupOrders(response.data);
+    orders.value = groupedOrders;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-})
+});
+
+const groupOrders = (data) => {
+  return data.reduce((acc, item) => {
+    let order = acc.find(o => o.id === item.id);
+    if (!order) {
+      order = { ...item, products: [] };
+      acc.push(order);
+    }
+    order.products.push({
+      name: item.name,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+    });
+    return acc;
+  }, []);
+};
 
 const getStatus = (status_id) => {
-  return statuses.find(status => status.id === status_id) || { text: 'Unknown', BBadgeVariant: 'secondary' }
-}
+  return statuses.find(status => status.id === status_id) || { text: 'Unknown', BBadgeVariant: 'secondary' };
+};
 
 const toggleDetails = (itemId) => {
-  detailsVisibility.value[itemId] = !detailsVisibility.value[itemId]
-}
+  detailsVisibility.value[itemId] = !detailsVisibility.value[itemId];
+};
 
 const showOrdersByStatus = async() => {
-    console.log("co ty dajesz??" + selectedStatus.value)
-    if(selectedStatus.value === '') {
-        try {
-            const response = await axios.get('http://localhost:8888/orders', { withCredentials: true })
-            orders.value = response.data
-        } catch (error) {
-            console.error(error)
-  }
-    } else {
-        try {
-            const response = await axios.get(`http://localhost:8888/orders/status/${selectedStatus.value}/test`, { withCredentials: true})
-            orders.value = response.data 
-        } catch(error) {
-            console.log(error)
-        }
+    console.log(orders)
+  if (selectedStatus.value === '') {
+    try {
+      const response = await axios.get('http://localhost:8888/orders', { withCredentials: true });
+      const groupedOrders = groupOrders(response.data);
+      orders.value = groupedOrders;
+    } catch (error) {
+      console.error(error);
     }
-}
+  } else {
+    try {
+      const response = await axios.get(`http://localhost:8888/orders/status/${selectedStatus.value}/test`, { withCredentials: true });
+      const groupedOrders = groupOrders(response.data);
+      orders.value = groupedOrders;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+};
 
 const confirmStatusChange = async (order) => {
   try {
@@ -71,79 +89,96 @@ const confirmStatusChange = async (order) => {
       `http://localhost:8888/orders/${order.id}/get`,
       { withCredentials: true }
     );
-    replaceOrder(response2.data[0]);
+    const groupedOrders = groupOrders(response2.data);
+    console.log(groupedOrders)
+    replaceOrder(groupedOrders[0]);
   } catch (error) {
     console.log(error);
   }
 };
 
-
 const replaceOrder = (updatedOrder) => {
-  console.log("Co tu chowasz?" + updatedOrder.phone);
+    console.log(updatedOrder)
   const orderIndex = orders.value.findIndex((order) => order.id === updatedOrder.id);
   if (orderIndex !== -1) {
     orders.value[orderIndex] = updatedOrder;
+    console.log("WYKONANO")
   } else {
     console.log('Order not found!');
   }
 };
 
+function calculateTotalPrice(order) {
+    let totalPrice = 0
+    for (let product of order) {
+        totalPrice += (product.quantity * parseFloat(product.unit_price))
+    }
+    return totalPrice
+};
+
 </script>
 
 <template>
-    <BContainer>
-        <BRow>
-            <BCol lg="6" class="my-3">
-                <BFormGroup>
-                    <BFormSelect v-model="selectedStatus" :options="[{ value: '', text: 'All Statuses' }, ...statuses.map(status => ({ value: status.id, text: status.text }))]" />
-                </BFormGroup>
-            </BCol>
-            <BCol class="my-3">
-                <BButton size="bg" variant="primary" @click="showOrdersByStatus()">Show</BButton>
-            </BCol>
-        </BRow>
-        <BRow>
-        <BCol v-for="order in orders" :key="order.id" :lg="orders.length === 1 ? 12 : 6"  class="mb-4">
-            <BCard :class="{'expanded-card': detailsVisibility[order.id] || formVisibility[order.id]}">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5>Order #{{ order.id }}</h5>
-                <BBadge :variant="getStatus(order.status_id).BBadgeVariant">
-                {{ getStatus(order.status_id).text }}
-                </BBadge>
-            </div>
-            <p>Confirmed Date: <strong>{{ order.confirmed_date || 'Waiting for confirmation' }}</strong></p>
+  <BContainer>
+    <BRow>
+      <BCol lg="6" class="my-3">
+        <BFormGroup>
+          <BFormSelect v-model="selectedStatus" :options="[{ value: '', text: 'All Statuses' }, ...statuses.map(status => ({ value: status.id, text: status.text }))]" />
+        </BFormGroup>
+      </BCol>
+      <BCol class="my-3">
+        <BButton size="bg" variant="primary" @click="showOrdersByStatus()">Show</BButton>
+      </BCol>
+    </BRow>
+    <BRow>
+      <BCol v-for="order in orders" :key="order.id" :lg="orders.length === 1 ? 12 : 6" class="mb-4">
+        <BCard :class="{'expanded-card': detailsVisibility[order.id]}">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5>Order #{{ order.id }}</h5>
+            <BBadge :variant="getStatus(order.status_id).BBadgeVariant">
+              {{ getStatus(order.status_id).text }}
+            </BBadge>
+          </div>
+          <p>Confirmed Date: <strong>{{ order.confirmed_date || 'Waiting for confirmation' }}</strong></p>
+          <p>Total Price: <strong>${{ calculateTotalPrice(order.products) }}</strong></p>
+          <div>
+            <BFormGroup label="Change Status" class="mt-3">
+              <BFormSelect v-model="order.newStatus" :options="statuses.map(status => ({value: status.id, text: status.text}))"/>
+            </BFormGroup>
+            <BButton size="sm" class="mt-2 center" :disabled="order.newStatus === order.status_id" @click="confirmStatusChange(order)">
+              Confirm new status
+            </BButton>
+          </div>
 
-            <div>
-                <BFormGroup label="Change Status" class="mt-3">
-                    <BFormSelect v-model="order.newStatus" :options="statuses.map(status => ({value: status.id, text: status.text,}))"/>
-                </BFormGroup>
-                <BButton size="sm" class="mt-2 center" :disabled="order.newStatus === order.status_id" @click="confirmStatusChange(order)">
-                    Confirm new status
-                </BButton>
-            </div>
-            
-
-            <div class="d-flex justify-content-between mt-3">
-                <BButton size="sm" @click="toggleDetails(order.id)">
-                    {{ detailsVisibility[order.id] ? 'Hide' : 'Show' }} Details
-                </BButton>
-            </div>
-            
-            <div v-if="detailsVisibility[order.id]" class="details-container mt-3">
-                <hr />
+          <div class="d-flex justify-content-between mt-3">
+            <BButton size="sm" @click="toggleDetails(order.id)">
+              {{ detailsVisibility[order.id] ? 'Hide' : 'Show' }} Details
+            </BButton>
+          </div>
+          <hr />
+          <div v-if="detailsVisibility[order.id]" class="details-container mt-3 d-flex justify-content-between align-items-center">   
+            <div> 
                 <h6>Details:</h6>
                 <p>Name: {{ order.customer_name }}</p>
                 <p>e-mail: {{ order.email }}</p>
                 <p>Phone: {{ order.phone }}</p>
             </div>
-            </BCard>
-        </BCol>
-        </BRow>
-    </BContainer>
+            <div> 
+                <h6>Products:</h6>
+                <ul>
+                <li v-for="product in order.products" :key="product.name">
+                    {{ product.name }} - {{ product.quantity }} x ${{ product.unit_price }}
+                </li>
+                </ul> 
+            </div>
+          </div>
+        </BCard>
+      </BCol>
+    </BRow>
+  </BContainer>
 </template>
 
 <style scoped>
-/* Opcjonalne dostosowanie stylów dla kafelków */
 .card {
   border: 1px solid #ddd;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -151,7 +186,7 @@ const replaceOrder = (updatedOrder) => {
 .expanded-card {
   min-height: 300px; /* Adjust this value as needed */
 }
-.details-container {/* Adjust this value as needed */
+.details-container {
   overflow: auto;
 }
 </style>

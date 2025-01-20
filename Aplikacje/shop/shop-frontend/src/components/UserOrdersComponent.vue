@@ -21,11 +21,28 @@ const statuses = [
 onMounted(async () => {
   try {
     const response = await axios.get('http://localhost:8888/orders/customer/test', { withCredentials: true })
-    orders.value = response.data
+    const groupedOrders = groupOrders(response.data);
+    orders.value = groupedOrders
   } catch (error) {
     console.error(error)
   }
 })
+
+const groupOrders = (data) => {
+  return data.reduce((acc, item) => {
+    let order = acc.find(o => o.id === item.id);
+    if (!order) {
+      order = { ...item, products: [] };
+      acc.push(order);
+    }
+    order.products.push({
+      name: item.name,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+    });
+    return acc;
+  }, []);
+};
 
 const getStatus = (status_id) => {
   return statuses.find(status => status.value === status_id) || { text: 'Unknown', BBadgeVariant: 'secondary' }
@@ -60,12 +77,22 @@ const submitOpinion = async (itemId) => {
     // alert('Failed to submit opinion.')
   }
 }
+
+function calculateTotalPrice(order) {
+    let totalPrice = 0
+    for (let product of order) {
+        totalPrice += (product.quantity * parseFloat(product.unit_price))
+    }
+    return totalPrice
+};
+
+
 </script>
 
 <template>
     <BContainer>
         <BRow>
-        <BCol v-for="order in orders" :key="order.id" md="4" class="mb-4">
+        <BCol v-for="order in orders" :key="order.id" lg="6" class="mb-4">
             <BCard :class="{'expanded-card': detailsVisibility[order.id] || formVisibility[order.id]}">
             <div class="d-flex justify-content-between align-items-center">
                 <h5>Order #{{ order.id }}</h5>
@@ -74,7 +101,7 @@ const submitOpinion = async (itemId) => {
                 </BBadge>
             </div>
             <p>Confirmed Date: <strong>{{ order.confirmed_date || 'Waiting for confirmation' }}</strong></p>
-
+            <p>Total Price: <strong>${{ calculateTotalPrice(order.products) }}</strong></p>
             <div class="d-flex justify-content-between mt-3">
                 <BButton size="sm" @click="toggleDetails(order.id)">
                 {{ detailsVisibility[order.id] ? 'Hide' : 'Show' }} Details
@@ -84,14 +111,23 @@ const submitOpinion = async (itemId) => {
                 </BButton>
             </div>
             
-            <div v-if="detailsVisibility[order.id]" class="details-container mt-3">
-                <hr />
-                <h6>Details:</h6>
-                <p>Name: {{ order.customer_name }}</p>
-                <p>e-mail: {{ order.email }}</p>
-                <p>Phone: {{ order.phone }}</p>
+            <hr />
+            <div v-if="detailsVisibility[order.id]" class="details-container mt-3 d-flex justify-content-between align-items-center">   
+              <div> 
+                  <h6>Details:</h6>
+                  <p>Name: {{ order.customer_name }}</p>
+                  <p>e-mail: {{ order.email }}</p>
+                  <p>Phone: {{ order.phone }}</p>
+              </div>
+              <div> 
+                  <h6>Products:</h6>
+                  <ul>
+                  <li v-for="product in order.products" :key="product.name">
+                      {{ product.name }} - {{ product.quantity }} x ${{ product.unit_price }}
+                  </li>
+                  </ul> 
+              </div>
             </div>
-
             <div v-if="formVisibility[order.id]" class="mt-3">
                 <hr />
                 <BForm @submit.prevent="submitOpinion(order.id)">

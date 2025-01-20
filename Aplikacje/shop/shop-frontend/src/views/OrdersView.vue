@@ -12,7 +12,7 @@ const authStore = useAuthStore()
       <div v-if="authStore.role === 'KLIENT'">
         <UserOrdersComponent/>
       </div>
-      <div>
+      <div v-else>
         <AllOrders/>
       </div>
   </div>
