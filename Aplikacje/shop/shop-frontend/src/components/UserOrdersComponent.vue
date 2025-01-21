@@ -127,14 +127,14 @@ const sortedOrders = computed(() => {
             <p>Confirmed Date: <strong>{{ order.confirmed_date || 'Waiting for confirmation' }}</strong></p>
             <p>Total Price: <strong>${{ calculateTotalPrice(order) }}</strong></p>
             <div class="d-flex justify-content-between mt-3">
-                <BButton size="sm" @click="toggleDetails(order.id)">
-                {{ detailsVisibility[order.id] ? 'Hide' : 'Show' }} Details
+                <BButton size="m" @click="toggleDetails(order.id)">
+                  <font-awesome-icon icon="fa-solid fa-circle-info" class="me-2"/> {{ detailsVisibility[order.id] ? 'Hide' : 'Show' }} Details
                 </BButton>
-                <BButton size="sm" v-if="order.rating === null" @click="toggleForm(order.id)" :disabled="order.status_id === 2 || order.status_id === 1">
-                {{formVisibility[order.id] ? 'Hide' : 'Add Opinion'}}
+                <BButton size="m" v-if="order.rating === null" @click="toggleForm(order.id)" :disabled="order.status_id === 2 || order.status_id === 1">
+                  <font-awesome-icon icon="fa-solid fa-comment" class="me-2"/>{{formVisibility[order.id] ? 'Hide' : 'Add Opinion'}}
                 </BButton>
-                <BButton size="sm" v-else @click="showOpinion(order.id)">
-                  {{ opinionVisibility[order.id] ? "Hide" : "Show opinion" }}
+                <BButton size="m" v-else @click="showOpinion(order.id)">
+                  <font-awesome-icon icon="fa-solid fa-comment" class="me-2"/>{{ opinionVisibility[order.id] ? "Hide" : "Show opinion" }}
                 </BButton>
             </div>
             

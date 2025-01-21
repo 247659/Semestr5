@@ -167,17 +167,17 @@ const sortedOrders = computed(() => {
             <BFormGroup label="Change Status" class="mt-3">
               <BFormSelect v-model="order.newStatus" :options="statuses.map(status => ({value: status.id, text: status.text}))"/>
             </BFormGroup>
-            <BButton size="sm" class="mt-2 center" :disabled="order.newStatus === order.status_id" @click="confirmStatusChange(order)">
+            <BButton size="m" class="mt-2 center" :disabled="order.newStatus === order.status_id" @click="confirmStatusChange(order)">
               Confirm new status
             </BButton>
           </div>
 
           <div class="d-flex justify-content-between mt-3">
-            <BButton size="sm" @click="toggleDetails(order.id)">
-              {{ detailsVisibility[order.id] ? 'Hide' : 'Show' }} Details
+            <BButton size="m" @click="toggleDetails(order.id)">
+              <font-awesome-icon icon="fa-solid fa-circle-info" class="me-2"/> {{ detailsVisibility[order.id] ? 'Hide' : 'Show' }} Details
             </BButton>
-            <BButton size="sm" v-if="order.rating !== null" @click="showOpinion(order.id)">
-              {{ opinionVisibility[order.id] ? "Hide" : "Show opinion" }}
+            <BButton size="m" v-if="order.rating !== null" @click="showOpinion(order.id)">
+              <font-awesome-icon icon="fa-solid fa-comment" class="me-2"/> {{ opinionVisibility[order.id] ? "Hide" : "Show opinion" }}
             </BButton>
           </div>
           <hr />

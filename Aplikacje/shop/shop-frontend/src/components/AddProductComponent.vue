@@ -112,10 +112,10 @@ const loadBase = async (products) => {
   <div>
     <input type="file" @change="handleFileUpload" accept=".csv" style="display: none;" ref="fileInput">
     <BButton class="add-product-file" variant="primary" @click="$refs.fileInput.click()">
-      Load products
+      <font-awesome-icon icon="fa-solid fa-download" /> Load products
     </BButton>
     <BButton @click="toggleForm" class="add-product-button" variant="primary">
-      {{ showForm ? 'Close' : 'Add Product' }}
+      <font-awesome-icon icon="fa-solid fa-plus"/> {{ showForm ? 'Close' : 'Add Product' }}
     </BButton>
     <div v-if="showForm" class="form-container">
       <BForm @submit.prevent="submitForm">

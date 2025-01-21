@@ -38,7 +38,7 @@ const handleLogout = async () => {
     <BNavbar v-b-color-mode="'light'" toggleable="lg" variant="primary" class="fixed-top w-100 navbar">
       <BNavbarBrand>
         <RouterLink to="/" class="nav-link">
-          <font-awesome-icon icon="fa-solid fa-house" class="me-2"/>Home</RouterLink>
+          <font-awesome-icon icon="fa-solid fa-store" class="me-2"/>Store</RouterLink>
       </BNavbarBrand>
       <BNavbarToggle target="nav-collapse" />
       <BCollapse id="nav-collapse" is-nav>

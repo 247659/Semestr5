@@ -140,14 +140,14 @@ const handleAction = (item) => {
                 {{ data.item.unit_weight }}
             </template>
             <template #cell(actions)="data">
-                <BButton v-if="authStore.role === 'PRACOWNIK'" size="sm" class="me-1" @click="startEditing(data.item)">
-                    Edit product
+                <BButton v-if="authStore.role === 'PRACOWNIK'" size="m" class="me-1" @click="startEditing(data.item)">
+                    <font-awesome-icon icon="fa-solid fa-pen" /> Edit product
                 </BButton>
-                <BButton v-else size="sm" class="me-1" @click="handleAction(data.item)">
+                <BButton v-else size="m" class="me-1" @click="handleAction(data.item)">
                     <font-awesome-icon icon="fa-solid fa-cart-plus" /> Add to card
                 </BButton>
-                <BButton size="sm" class="me-1" @click="data.toggleDetails">
-                    {{ data.detailsShowing ? 'Hide' : 'Show' }} Details
+                <BButton size="m" class="me-1" @click="data.toggleDetails">
+                    <font-awesome-icon icon="fa-solid fa-circle-info" /> {{ data.detailsShowing ? 'Hide' : 'Show' }} Details
                 </BButton>
             </template>
             <template #row-details="data">
