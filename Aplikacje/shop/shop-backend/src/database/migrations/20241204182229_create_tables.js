@@ -14,7 +14,7 @@ exports.up = function(knex) {
             table.text('description');
             table.decimal('unit_price', 10, 2).notNullable();
             table.decimal('unit_weight', 10, 3).notNullable();
-            table.integer('category_id').unsigned().notNullable()
+            table.integer('category_id').unsigned().nullable()
                 .references('id').inTable('categories')
                 .onDelete('CASCADE');
         })

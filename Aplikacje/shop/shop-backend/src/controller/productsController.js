@@ -3,6 +3,7 @@ const { StatusCodes, getReasonPhrase } = require('http-status-codes');
 const axios = require("axios");
 require('dotenv').config({ path: '../../.env' });
 
+
 const getProducts = async (req, res) => {
     try {
         const products = await knex('products').select('*');
@@ -42,21 +43,21 @@ const createProduct = async (req, res) => {
         });
     }
 
-    if (!name || !description || !unit_price || !unit_weight || !category_id ) {
+    if (!name || !description || !unit_price || !unit_weight ) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-            message: 'Nieprawidłowe dane. Wymagane pola: name, description, price, weight, category_id.',
+            message: 'Nieprawidłowe dane. Wymagane pola: name, price, weight, description',
         });
     }
 
     try {
-        const categoryExists = await knex('categories')
-            .where('id', category_id)
-            .first();
+        if (category_id) {
+            const categoryExists = await knex('categories').where('id', category_id).first();
 
-        if (!categoryExists) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                message: `Kategoria o ID ${category_id} nie istnieje.`,
-            });
+            if (!categoryExists) {
+                return res.status(StatusCodes.NOT_FOUND).json({
+                    message: `Kategoria o ID ${category_id} nie istnieje.`,
+                });
+            }
         }
 
         const [productId] = await knex('products').insert({
@@ -64,7 +65,7 @@ const createProduct = async (req, res) => {
             description: description || '',
             unit_price,
             unit_weight,
-            category_id: category_id,
+            category_id: category_id || null,
         });
 
         res.status(StatusCodes.CREATED).json({
@@ -129,7 +130,6 @@ const seoDescription = async (req, res) => {
                 error: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR)
             });
     }
-    console.log(product);
     if (product === undefined) {
         return res.status(StatusCodes.BAD_REQUEST).json({ message: `Produkt o ID ${id} nie istnieje.` });
     }
@@ -150,13 +150,11 @@ const seoDescription = async (req, res) => {
         messages: [
             {
                 role: 'system',
-                content: `You are a description model that creates concise, SEO-friendly product descriptions in valid HTML format. Do not add any additional notes, explanations, or comments.. 
-                The input must conform to the following JSON schema: ${productData}. The output should be in html format`,
+                content: `You are a description model that creates concise, SEO-friendly product descriptions in valid HTML format. Do not add any additional notes, explanations, or comments. The input must conform to the following JSON schema: ${JSON.stringify(productData)}. The output should be in HTML format.`,
             },
             {
                 role: 'user',
-                content: `Generate an SEO-friendly HTML description for the following product: ${JSON.stringify(productData)}. 
-               Only include the HTML structure and the required content. Avoid including any extra notes or instructions in your response. `,
+                content: `Generate an SEO-friendly HTML creative description for the following product: ${JSON.stringify(productData)}. Only include one paragraph <p> with the description. Do not include any additional tags such as <html> or <body>. Avoid including any extra notes or instructions in your response.`,
             }
         ],
         model: "llama3-8b-8192",
@@ -166,13 +164,8 @@ const seoDescription = async (req, res) => {
     try {
         const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', body, { headers });
         const seoDescription = response.data.choices[0].message.content;
-
         res.status(StatusCodes.OK).send(`
-        <html lang="pl">
-            <body>
                 ${seoDescription}
-            </body>
-        </html>
     `);
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({

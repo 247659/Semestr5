@@ -78,7 +78,7 @@ const handleOrder = async () => {
                 </div>
             </template>
             <template #cell(totalPrice)="data">
-                ${{ data.item.quantity * data.item.price }}
+                ${{ Math.round(data.item.quantity * data.item.price * 100) / 100 }}
             </template>
             <template #cell(actions)="data">
                 <BButton size="sm" variant="danger" @click="orderStore.removeProduct(data.item.id)">

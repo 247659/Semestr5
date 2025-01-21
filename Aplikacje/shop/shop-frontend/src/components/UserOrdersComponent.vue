@@ -85,7 +85,8 @@ const submitOpinion = async (itemId) => {
 }
 
 const calculateTotalPrice = (order) => {
-  return order.products.reduce((total, product) => total + product.quantity * product.unit_price, 0);
+  const total = order.products.reduce((total, product) => total + product.quantity * product.unit_price, 0);
+  return Math.round(total * 100) / 100;
 };
 
 const sortedOrders = computed(() => {

@@ -13,7 +13,8 @@ export const useOrderStore = defineStore('order', {
         return this.productsInfo
     },
     totalPrice() {
-        return this.productsInfo.reduce((total, product) => total + product.price * product.quantity, 0)
+        const total = this.productsInfo.reduce((total, product) => total + product.price * product.quantity, 0);
+        return Math.round(total * 100) / 100;
       }
 },
 actions: {

@@ -69,8 +69,11 @@ const cancelEditing = () => {
 
 const saveChanges = async () => {
   try {
-    console.log('co tu tak CICHO???')
-    const response = await axios.put(`http://localhost:8888/products/${editedProductData.value.id}`, editedProductData.value, {withCredentials: true});
+    console.log('co tu tak CICHO???' + editedProductData.value.description)
+
+    const { _showDetails, ...validProductData } = editedProductData.value;
+
+    const response = await axios.put(`http://localhost:8888/products/${editedProductData.value.id}`, validProductData, {withCredentials: true});
     const index = products.value.findIndex(product => product.id === editedProductData.value.id);
     if (index !== -1) {
       products.value[index] = response.data; // Zaktualizowanie produktu w liście
@@ -86,6 +89,18 @@ const saveChanges = async () => {
     }
     console.error(error);
   }
+}
+
+const generateDescription = async (productId) => {
+    try {
+        const response = await axios.post(`http://localhost:8888/products/${productId}/seo-description`, null, 
+            {withCredentials: true}
+        )
+        editedProductData.value.description = response.data
+        console.log(response.data)
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 const handleAction = (item) => {
@@ -180,6 +195,9 @@ const handleAction = (item) => {
                 </BCol>
             </BRow>
             <BRow>
+                <BCol class="pt-2" @click="generateDescription(editedProductData.id)">
+                    <BButton> Generate description</BButton>
+                </BCol>
                 <BCol class="d-flex justify-content-end pt-2">
                     <BButton variant="secondary" class="me-1 " @click="cancelEditing">Cancel</BButton>
                     <BButton variant="primary" @click="saveChanges">OK</BButton>

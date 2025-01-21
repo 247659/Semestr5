@@ -4,6 +4,7 @@ import { BButton, BForm, BFormGroup, BFormInput, BFormTextarea, BFormSelect } fr
 import axios from 'axios';
 import { useToast } from 'vue-toastification';
 import { useRouter } from 'vue-router';
+import Papa from 'papaparse';
 
 const showForm = ref(false);
 const name = ref('');
@@ -53,12 +54,65 @@ const submitForm = async () => {
     console.error(error);
   }
 };
+
+const handleFileUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    Papa.parse(file, {
+      header: true,
+      dynamicTyping: true,
+      complete: (results) => {
+        const products = results.data
+          .map(row => {
+            // Sprawdź, czy wszystkie wymagane pola są obecne i poprawne
+            if (!row.name || !row.description || !row.unit_price || !row.unit_weight) {
+              toast.error('Invalid data: All fields (name, description, unit_price, unit_weight) are required.');
+              return null;
+            }
+
+            if (typeof row.unit_price !== 'number' || typeof row.unit_weight !== 'number') {
+              toast.error('Invalid data: unit_price and unit_weight must be numbers.');
+              return null;
+            }
+
+            return {
+              name: row.name.trim(), // Usuń nadmiarowe spacje
+              description: row.description.trim(),
+              unit_price: row.unit_price,
+              unit_weight: row.unit_weight
+            };
+          })
+          .filter(product => product !== null); // Usuń błędne dane
+
+        console.log(products);
+        loadBase(products);
+      },
+      error: (error) => {
+        toast.error('Failed to parse CSV file.');
+        console.error(error);
+      }
+    });
+  }
+};
+
+const loadBase = async (products) => {
+  try {
+    await axios.post('http://localhost:8888/init', products, { withCredentials : true})
+    toast.success("Successfully added products to database")
+  } catch (error) {
+    toast.error(error.response.data.message)
+    console.log(error)
+  }
+    
+}
+
 </script>
 
 <template>
   <div>
-    <BButton class="add-product-file" variant="primary">
-        Load file
+    <input type="file" @change="handleFileUpload" accept=".csv" style="display: none;" ref="fileInput">
+    <BButton class="add-product-file" variant="primary" @click="$refs.fileInput.click()">
+      Load products
     </BButton>
     <BButton @click="toggleForm" class="add-product-button" variant="primary">
       {{ showForm ? 'Close' : 'Add Product' }}
@@ -113,5 +167,6 @@ const submitForm = async () => {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  width: 400px
 }
 </style>

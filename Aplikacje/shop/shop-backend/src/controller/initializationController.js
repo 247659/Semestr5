@@ -20,22 +20,31 @@ const makeInit = async (req, res) => {
         if (productCount.count > 0) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Baza danych już zawiera produkty." });
         }
-        const categoriesCount = await knex('categories').count('id as count').first();
-        if (categoriesCount.count > 0) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Baza danych już zawiera kategorie." });
-        }
+        // const categoriesCount = await knex('categories').count('id as count').first();
+        // if (categoriesCount.count > 0) {
+        //     return res.status(StatusCodes.BAD_REQUEST).json({ message: "Baza danych już zawiera kategorie." });
+        // }
         const products = req.body;
         if (!Array.isArray(products) || products.length === 0) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Nieprawidłowe dane. Oczekiwano tablicy produktów." });
         }
-        await knex('categories').insert(categories);
+        // await knex('categories').insert(categories);
+
+        const token = req.cookies.accessToken;
+        if (!token) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Brak tokenu uwierzytelniającego." });
+        }
+        
         for (const product of products) {
             try {
-                await axios.post('http://localhost:8888/products', product, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
+                await axios.post('http://localhost:8888/products', product, 
+                    {
+                        headers: {
+                            Cookie: `accessToken=${token}`,
+                        },
+                        withCredentials: true,
+                    }
+                );
                 correct.push({
                     message: `Dodano: ${product.name}`,
                 })
