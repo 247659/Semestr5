@@ -113,7 +113,6 @@ const replaceOrder = (updatedOrder) => {
   const orderIndex = orders.value.findIndex((order) => order.id === updatedOrder.id);
   if (orderIndex !== -1) {
     orders.value[orderIndex] = updatedOrder;
-    console.log("WYKONANO")
   } else {
     console.log('Order not found!');
   }
@@ -169,7 +168,7 @@ const sortedOrders = computed(() => {
               {{ getStatus(order.status_id).text }}
             </BBadge>
           </div>
-          <p>Confirmed Date: <strong>{{ order.confirmed_date || 'Waiting for confirmation' }}</strong></p>
+          <p v-if="order.confirmed_date">Confirmed Date: <strong>{{ new Date(order.confirmed_date).toLocaleDateString() }}</strong></p>
           <p>Total Price: <strong>${{ calculateTotalPrice(order) }}</strong></p>
           <div>
             <BFormGroup label="Change Status" class="mt-3">
@@ -222,7 +221,7 @@ const sortedOrders = computed(() => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 .expanded-card {
-  min-height: 300px; /* Adjust this value as needed */
+  min-height: 300px;
 }
 .details-container {
   overflow: auto;

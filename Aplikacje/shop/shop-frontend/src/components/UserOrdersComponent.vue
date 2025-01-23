@@ -78,14 +78,12 @@ const submitOpinion = async (itemId) => {
       content: opinionText.value
     }, { withCredentials: true })
     toast.success(response.data.message);
-    // toast.success(response.data.message)
     opinionText.value = ''
     formVisibility.value[itemId] = false
     loadOrders();
   } catch (error) {
     // console.log(error.response.data.message)
     console.error('Error submitting opinion:', error)
-    // alert('Failed to submit opinion.')
   }
 }
 
@@ -132,7 +130,7 @@ const sortedOrders = computed(() => {
                 {{ getStatus(order.status_id).text }}
                 </BBadge>
             </div>
-            <p>Confirmed Date: <strong>{{ order.confirmed_date || 'Waiting for confirmation' }}</strong></p>
+            <p v-if="order.confirmed_date">Confirmed Date: <strong>{{ new Date(order.confirmed_date).toLocaleDateString() }}</strong></p>
             <p>Total Price: <strong>${{ calculateTotalPrice(order) }}</strong></p>
             <div class="d-flex justify-content-between mt-3">
                 <BButton size="m" @click="toggleDetails(order.id)">
@@ -193,9 +191,9 @@ const sortedOrders = computed(() => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 .expanded-card {
-  min-height: 300px; /* Adjust this value as needed */
+  min-height: 300px;
 }
-.details-container {/* Adjust this value as needed */
+.details-container {
   overflow: auto;
 }
 </style>

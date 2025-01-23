@@ -40,7 +40,7 @@ const handleOrder = async () => {
     const response = await axios.post(
         'http://localhost:8888/orders',
         orderData,
-        { withCredentials: true } // Umożliwia przesyłanie ciasteczek
+        { withCredentials: true }
     );
     successMessage.value = response.data.message
     orderStore.clearOrder()

@@ -8,26 +8,6 @@ const username = ref('')
 const password = ref('')
 const errorMessage = ref('')
 
-// const handleLogin = async () => {
-//   const userData = {
-//     username: username.value,
-//     password: password.value
-//   }
-//   try {
-//     const response = await axios.post('http://localhost:8888/auth/login', userData)
-//     authStore.setAccessToken(response.data.accessToken)
-//     router.push('/');
-//   } catch (error) {
-//     if (error.response && error.response.data && error.response.data.message) {
-//       errorMessage.value = error.response.data.message
-//     } else {
-//       errorMessage.value = 'Błąd połączenia z serwerem.'
-//     }
-    
-//     console.error(error);
-//   }
-// };
-
 const handleRegister = async () => {
   const userData = {
     username: username.value,

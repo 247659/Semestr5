@@ -14,9 +14,9 @@ const products = ref([])
 const categories = ref([])
 const filter = ref('')
 const selectedCategory = ref('')
-const editingProduct = ref(null) // Produkt, który jest edytowany
-const editedProductData = ref({}) // Zmienna przechowująca dane edytowanego produktu
-const showModal = ref(false) // Stan modalu
+const editingProduct = ref(null)
+const editedProductData = ref({})
+const showModal = ref(false)
 const errorMessage = ref('')
 
 const fields = [
@@ -58,17 +58,15 @@ const filteredProducts = computed(() => {
 })
 
 const startEditing = (product) => {
-  // Ustawienie danych produktu do edycji
   editingProduct.value = product;
   editedProductData.value = { ...product }; // Kopiowanie danych produktu do formularza
-  showModal.value = true; // Otwarcie modalu
+  showModal.value = true;
 }
 
 const cancelEditing = () => {
-  // Resetowanie stanu edycji
   editingProduct.value = null;
   editedProductData.value = {};
-  showModal.value = false; // Zamknięcie modalu
+  showModal.value = false;
 }
 
 const saveChanges = async () => {
@@ -79,9 +77,9 @@ const saveChanges = async () => {
     const response = await axios.put(`http://localhost:8888/products/${editedProductData.value.id}`, validProductData, {withCredentials: true});
     const index = products.value.findIndex(product => product.id === editedProductData.value.id);
     if (index !== -1) {
-      products.value[index] = response.data; // Zaktualizowanie produktu w liście
+      products.value[index] = response.data;
     }
-    cancelEditing(); // Zakończenie edycji
+    cancelEditing();
 
     toast.success(response.data.message)
     loadProducts();
@@ -110,7 +108,6 @@ const generateDescription = async (productId) => {
 const handleAction = (item) => {
     console.log('Clicked on item:', item)
     orderStore.addProductToCard(item)
-  // Tutaj dodaj logikę dla przycisku, np. otwarcie modala lub wykonanie akcji
 };
 </script>
 

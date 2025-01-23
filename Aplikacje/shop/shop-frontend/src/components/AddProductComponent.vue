@@ -42,7 +42,7 @@ const submitForm = async () => {
     }, {withCredentials: true});
     toast.success(response.data.message);
     router.push({ path: '/'})
-    // Reset form fields
+
     name.value = '';
     description.value = '';
     unit_price.value = '';
@@ -62,30 +62,43 @@ const handleFileUpload = (event) => {
       header: true,
       dynamicTyping: true,
       complete: (results) => {
-        const products = results.data
-          .map(row => {
-            // Sprawdź, czy wszystkie wymagane pola są obecne i poprawne
+        const invalidRows = [];
+        const errorMessages = [];
+ 
+        const filteredData = results.data.filter(row => 
+          Object.values(row).some(value => value !== null && value !== '')
+        );
+
+        const products = filteredData
+          .map((row, index) => {
             if (!row.name || !row.description || !row.unit_price || !row.unit_weight) {
-              toast.error('Invalid data: All fields (name, description, unit_price, unit_weight) are required.');
+              errorMessages.push(`Row ${index + 1}: Missing required fields (name, description, unit_price, unit_weight).`);
+              invalidRows.push(index + 1);
               return null;
             }
 
             if (typeof row.unit_price !== 'number' || typeof row.unit_weight !== 'number') {
-              toast.error('Invalid data: unit_price and unit_weight must be numbers.');
+              errorMessages.push(`Row ${index + 1}: unit_price and unit_weight must be numbers.`);
+              invalidRows.push(index + 1);
               return null;
             }
 
             return {
-              name: row.name.trim(), // Usuń nadmiarowe spacje
+              name: row.name.trim(),
               description: row.description.trim(),
               unit_price: row.unit_price,
               unit_weight: row.unit_weight
             };
           })
-          .filter(product => product !== null); // Usuń błędne dane
+          .filter(product => product !== null);
 
-        console.log(products);
-        loadBase(products);
+        if (invalidRows.length > 0) {
+          toast.error(`Invalid data in the following rows:\n${errorMessages.join('\n')}`);
+          console.error(`Invalid rows: ${invalidRows.join(', ')}`);
+        } else {
+          console.log(products);
+          loadBase(products);
+        }
       },
       error: (error) => {
         toast.error('Failed to parse CSV file.');
