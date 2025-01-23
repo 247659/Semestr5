@@ -19,6 +19,10 @@ const statuses = [
 ];
 
 onMounted(async () => {
+  loadOrders();
+});
+
+const loadOrders = async () => {
   try {
     const response = await axios.get('http://localhost:8888/orders', { withCredentials: true });
     const groupedOrders = groupOrders(response.data);
@@ -26,7 +30,7 @@ onMounted(async () => {
   } catch (error) {
     console.error(error);
   }
-});
+}
 
 const groupOrders = (data) => {
   return data.reduce((acc, item) => {
@@ -86,21 +90,22 @@ const confirmStatusChange = async (order) => {
       { withCredentials: true }
     );
     toast.success(response.data.message);
+    loadOrders();
   } catch (error) {
     console.log(error);
   }
 
-  try {
-    const response2 = await axios.get(
-      `http://localhost:8888/orders/${order.id}/get`,
-      { withCredentials: true }
-    );
-    const groupedOrders = groupOrders(response2.data);
-    console.log(groupedOrders)
-    replaceOrder(groupedOrders[0]);
-  } catch (error) {
-    console.log(error);
-  }
+  // try {
+  //   const response2 = await axios.get(
+  //     `http://localhost:8888/orders/${order.id}/get`,
+  //     { withCredentials: true }
+  //   );
+  //   const groupedOrders = groupOrders(response2.data);
+  //   console.log(groupedOrders)
+  //   replaceOrder(groupedOrders[0]);
+  // } catch (error) {
+  //   console.log(error);
+  // }
 };
 
 const replaceOrder = (updatedOrder) => {
@@ -134,15 +139,15 @@ const sortedOrders = computed(() => {
 <template>
   <BContainer>
     <BRow>
-      <BCol lg="6" class="my-3">
+      <BCol lg="6" class="my-3" v-if="sortedOrders.length > 0">
         <BFormGroup>
           <BFormSelect v-model="selectedStatus" :options="[{ value: '', text: 'All Statuses' }, ...statuses.map(status => ({ value: status.id, text: status.text }))]" />
         </BFormGroup>
       </BCol>
-      <BCol class="my-3">
+      <BCol class="my-3" v-if="sortedOrders.length > 0">
         <BButton size="bg" variant="primary" @click="showOrdersByStatus()">Show</BButton>
       </BCol>
-      <BCol class="my-3">
+      <BCol class="my-3" v-if="sortedOrders.length > 0">
         <BFormGroup>
           <BFormSelect id="sort-by" v-model="sortBy" :options="[
             { value: '', text: 'Sort by...' },
@@ -150,6 +155,9 @@ const sortedOrders = computed(() => {
             { value: 'date', text: 'Confirmation Date' }
           ]" />
         </BFormGroup>
+      </BCol>
+      <BCol v-else>
+        <h1 class="text-center">There is not orders!</h1>
       </BCol>
     </BRow>
     <BRow>

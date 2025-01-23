@@ -21,14 +21,18 @@ const statuses = [
 ]
 
 onMounted(async () => {
+  loadOrders();
+});
+
+const loadOrders = async () => {
   try {
-    const response = await axios.get('http://localhost:8888/orders/customer/test', { withCredentials: true })
+    const response = await axios.get('http://localhost:8888/orders', { withCredentials: true });
     const groupedOrders = groupOrders(response.data);
-    orders.value = groupedOrders
+    orders.value = groupedOrders;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-})
+}
 
 const groupOrders = (data) => {
   return data.reduce((acc, item) => {
@@ -77,6 +81,7 @@ const submitOpinion = async (itemId) => {
     // toast.success(response.data.message)
     opinionText.value = ''
     formVisibility.value[itemId] = false
+    loadOrders();
   } catch (error) {
     // console.log(error.response.data.message)
     console.error('Error submitting opinion:', error)
@@ -105,7 +110,7 @@ const sortedOrders = computed(() => {
 <template>
     <BContainer>
       <BRow>
-      <BCol class="my-3">
+      <BCol class="my-3" v-if="sortedOrders.length > 0">
         <BFormGroup>
           <BFormSelect id="sort-by" v-model="sortBy" :options="[
             { value: '', text: 'Sort by...' },
@@ -113,6 +118,9 @@ const sortedOrders = computed(() => {
             { value: 'date', text: 'Confirmation Date' }
           ]" />
         </BFormGroup>
+      </BCol>
+      <BCol v-else>
+        <h1 class="text-center">You do not have any orders!</h1>
       </BCol>
     </BRow>
         <BRow>

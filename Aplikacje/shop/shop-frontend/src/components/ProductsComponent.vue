@@ -27,6 +27,16 @@ const fields = [
 ]
 
 onMounted(async () => {
+    loadProducts();
+    try {
+        const response = await axios.get('http://localhost:8888/categories')
+        categories.value = response.data
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+const loadProducts = async () => {
     try {
         const response = await axios.get('http://localhost:8888/products')
         products.value = response.data.map(product => ({
@@ -36,13 +46,7 @@ onMounted(async () => {
     } catch (error) {
         console.log(error)
     }
-    try {
-        const response = await axios.get('http://localhost:8888/categories')
-        categories.value = response.data
-    } catch (error) {
-        console.log(error)
-    }
-})
+}
 
 const filteredProducts = computed(() => {
     if (!selectedCategory.value) {
@@ -69,7 +73,6 @@ const cancelEditing = () => {
 
 const saveChanges = async () => {
   try {
-    console.log('co tu tak CICHO???' + editedProductData.value.description)
 
     const { _showDetails, ...validProductData } = editedProductData.value;
 
@@ -81,6 +84,7 @@ const saveChanges = async () => {
     cancelEditing(); // Zakończenie edycji
 
     toast.success(response.data.message)
+    loadProducts();
   } catch (error) {
     if (error.response && error.response.data && error.response.data.message) {
       errorMessage.value = error.response.data.message
