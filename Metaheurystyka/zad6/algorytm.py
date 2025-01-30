@@ -27,7 +27,7 @@ def distance(c1, c2):
     return math.sqrt((c1['x'] - c2['x'])**2 + (c1['y'] - c2['y'])**2)
 
 
-# Funkcja oceny rozwiązania
+# Funkcja oceny rozwiązania z uwzględnieniem czasu gotowości
 def evaluate_solution(solution, customers, vehicle_capacity, depot):
     total_distance = 0
     total_violation = 0
@@ -42,26 +42,29 @@ def evaluate_solution(solution, customers, vehicle_capacity, depot):
             total_distance += dist
             current_time += dist
 
-            # Sprawdzenie naruszenia czasu
+
             if current_time < customer['ready_time']:
-                current_time = customer['ready_time']
+                wait_time = customer['ready_time'] - current_time
+                current_time += wait_time
             elif current_time > customer['due_date']:
                 total_violation += current_time - customer['due_date']
 
             current_time += customer['service_time']
             current_capacity += customer['demand']
 
-            # Sprawdzenie naruszenia pojemności
             if current_capacity > vehicle_capacity:
                 total_violation += current_capacity - vehicle_capacity
 
             last_customer = customer
 
-        # Powrót do depotu
         dist = distance(last_customer, depot)
         total_distance += dist
 
     return total_distance, total_violation
+
+
+def sort_route_by_ready_time(route, customers):
+    return sorted(route, key=lambda customer_id: customers[customer_id - 1]['ready_time'])
 
 
 # Inicjalizacja populacji z użyciem heurystyki Nearest Neighbor
@@ -69,6 +72,7 @@ def initialize_population(customers, population_size, num_vehicles):
     population = []
     for _ in range(population_size):
         routes = nearest_neighbor_solution(customers, num_vehicles)
+        routes = [sort_route_by_ready_time(route, customers) for route in routes]
         population.append(routes)
     return population
 
@@ -143,7 +147,6 @@ def crossover(parent1, parent2):
 
 
 # Mutacja (swap)
-
 def mutate(solution, mutation_rate):
     for i in range(len(solution)):
         if random.random() < mutation_rate:
@@ -179,6 +182,7 @@ def calculate_route_distance(route, customers):
     return total_distance
 
 
+# Funkcja do rysowania tras
 # Funkcja do rysowania tras
 def plot_routes(routes, customers):
     depot = customers[0]
@@ -218,7 +222,8 @@ def plot_routes(routes, customers):
     plt.show()
 
 
-# Algorytm genetyczny
+
+# Algorytm genetyczny z stagnacją
 def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size, generations,
                       mutation_rate, crossing_rate, stagnation_limit=20):
     depot = customers[0]
@@ -241,9 +246,9 @@ def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size
         if current_distance < best_distance:
             best_solution = current_best_solution
             best_distance = current_distance
-            stagnation_counter = 0  # Zresetuj licznik stagnacji
+            stagnation_counter = 0
         else:
-            stagnation_counter += 1  # Zwiększ licznik stagnacji
+            stagnation_counter += 1
 
         # Sprawdź warunek stagnacji
         if stagnation_counter >= stagnation_limit:
@@ -262,10 +267,12 @@ def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size
             child1 = mutate(child1, mutation_rate)
             for i in range(len(child1)):
                 child1[i] = two_opt(child1[i], customers)
+                child1[i] = sort_route_by_ready_time(child1[i], customers)
             new_population.append(child1)
             child2 = mutate(child2, mutation_rate)
             for i in range(len(child2)):
                 child2[i] = two_opt(child2[i], customers)
+                child2[i] = sort_route_by_ready_time(child2[i], customers)
             new_population.append(child2)
 
         population = new_population
