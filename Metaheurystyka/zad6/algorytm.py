@@ -278,9 +278,9 @@ def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size
 
 # Przykład użycia
 if __name__ == "__main__":
-    customers = load_data("r1.txt")
+    customers = load_data("c1.txt")
     vehicle_capacity = 200
-    best_solution, distance = genetic_algorithm(customers=customers, vehicle_capacity=vehicle_capacity, num_vehicles=20,
+    best_solution, distance = genetic_algorithm(customers=customers, vehicle_capacity=vehicle_capacity, num_vehicles=10,
                                       generations=500, population_size=100, mutation_rate=0.3, crossing_rate=0.8)
     print("Best Solution: ", best_solution)
     print("Total distance: ", distance)
