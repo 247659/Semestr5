@@ -113,17 +113,13 @@ def crossover(parent1, parent2):
 
     route_size = len(parent1[0])
 
-    # Wybierz dwa losowe punkty podziału
     size = len(flat_parent1)
     point1, point2 = sorted(random.sample(range(size), 2))
 
-    # Utwórz dziecko
     child = [None] * size
 
-    # Skopiuj segment między punktami podziału z rodzica 1 do dziecka
     child[point1:point2] = flat_parent1[point1:point2]
 
-    # Wypełnij pozostałe pozycje klientami z rodzica 2, zachowując kolejność
     ptr = 0
     for i in range(size):
         if child[i] is None:
@@ -132,11 +128,10 @@ def crossover(parent1, parent2):
             child[i] = flat_parent2[ptr]
             ptr += 1
 
-    # Podziel dziecko z powrotem na trasy
     child_routes = []
     current_route = []
     for customer in child:
-        if not current_route or len(current_route) < route_size:  # Dostosuj rozmiar trasy
+        if not current_route or len(current_route) < route_size:
             current_route.append(customer)
         else:
             child_routes.append(current_route)
@@ -225,17 +220,35 @@ def plot_routes(routes, customers):
 
 # Algorytm genetyczny
 def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size, generations,
-                      mutation_rate, crossing_rate):
-    global best_solution
+                      mutation_rate, crossing_rate, stagnation_limit=20):
     depot = customers[0]
     population = initialize_population(customers, population_size, num_vehicles)
+
+    best_solution = None
+    best_distance = float('inf')
+    stagnation_counter = 0
 
     for generation in range(generations):
         population = selection(population, customers, vehicle_capacity, depot)
         new_population = []
 
-        best_solution = min(population, key=lambda x: evaluate_solution(x, customers, vehicle_capacity, depot)[0])
-        new_population.append(best_solution)
+        # Elityzm: zachowaj najlepsze rozwiązanie
+        current_best_solution = min(population, key=lambda x: evaluate_solution(x, customers, vehicle_capacity, depot)[0])
+        current_distance, _ = evaluate_solution(current_best_solution, customers, vehicle_capacity, depot)
+        new_population.append(current_best_solution)
+
+        # Sprawdź, czy nastąpiła poprawa
+        if current_distance < best_distance:
+            best_solution = current_best_solution
+            best_distance = current_distance
+            stagnation_counter = 0  # Zresetuj licznik stagnacji
+        else:
+            stagnation_counter += 1  # Zwiększ licznik stagnacji
+
+        # Sprawdź warunek stagnacji
+        if stagnation_counter >= stagnation_limit:
+            print(f"Stagnacja osiągnięta po {generation} generacjach. Kończenie działania.")
+            break
 
         while len(new_population) < population_size:
             parent1, parent2 = random.sample(population, 2)
@@ -258,20 +271,19 @@ def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size
         population = new_population
 
         # Ocena najlepszego rozwiązania w populacji
-        best_solution = min(population, key=lambda x: evaluate_solution(x, customers, vehicle_capacity, depot)[0])
-        distance, violation = evaluate_solution(best_solution, customers, vehicle_capacity, depot)
-        print(f"Generation {generation}: Best Distance = {distance}, Violation = {violation}")
+        print(f"Generation {generation}: Best Distance = {best_distance}, Stagnation Counter = {stagnation_counter}")
 
-    return best_solution
+    return best_solution, best_distance
 
 
 # Przykład użycia
 if __name__ == "__main__":
     customers = load_data("r1.txt")
     vehicle_capacity = 200
-    best_solution = genetic_algorithm(customers=customers, vehicle_capacity=vehicle_capacity, num_vehicles=20,
-                                      generations=100, population_size=50, mutation_rate=0.3, crossing_rate=0.8)
-    print("Best Solution:", best_solution)
+    best_solution, distance = genetic_algorithm(customers=customers, vehicle_capacity=vehicle_capacity, num_vehicles=20,
+                                      generations=500, population_size=100, mutation_rate=0.3, crossing_rate=0.8)
+    print("Best Solution: ", best_solution)
+    print("Total distance: ", distance)
     print("Best Solution Routes:")
     for i, route in enumerate(best_solution):
         print(f"Vehicle {i + 1}: {route}")
