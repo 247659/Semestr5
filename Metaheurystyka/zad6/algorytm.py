@@ -53,7 +53,7 @@ def evaluate_solution(solution, customers, vehicle_capacity, depot):
             current_capacity += customer['demand']
 
             if current_capacity > vehicle_capacity:
-                total_violation += current_capacity - vehicle_capacity
+                return float('inf'), float('inf'), float('inf')
 
             last_customer = customer
 
@@ -68,20 +68,21 @@ def sort_route_by_ready_time(route, customers):
 
 
 # Inicjalizacja populacji z użyciem heurystyki Nearest Neighbor
-def initialize_population(customers, population_size, num_vehicles):
+def initialize_population(customers, population_size, num_vehicles, cap):
     population = []
     for _ in range(population_size):
-        routes = nearest_neighbor_solution(customers, num_vehicles)
+        routes = nearest_neighbor_solution(customers, num_vehicles, cap)
         routes = [sort_route_by_ready_time(route, customers) for route in routes]
         population.append(routes)
     return population
 
-def nearest_neighbor_solution(customers, num_vehicles):
+def nearest_neighbor_solution(customers, num_vehicles, vehicle_capacity):
     depot = customers[0]
     remaining_customers = customers[1:]
     random.shuffle(remaining_customers)
 
     routes = [[] for _ in range(num_vehicles)]
+    vehicle_loads = [0] * num_vehicles
     vehicle_idx = 0
 
     while remaining_customers:
@@ -89,10 +90,15 @@ def nearest_neighbor_solution(customers, num_vehicles):
             last_customer = depot
         else:
             last_customer = customers[routes[vehicle_idx][-1] - 1]
-
-        nearest_customer = min(remaining_customers, key=lambda c: distance(last_customer, c))
-        routes[vehicle_idx].append(nearest_customer['id'])
-        remaining_customers.remove(nearest_customer)
+        nearest_customer = None
+        for customer in sorted(remaining_customers, key=lambda c: distance(last_customer, c)):
+            if vehicle_loads[vehicle_idx] + customer['demand'] <= vehicle_capacity:
+                nearest_customer = customer
+                break
+        if nearest_customer:
+            routes[vehicle_idx].append(nearest_customer['id'])
+            remaining_customers.remove(nearest_customer)
+            vehicle_loads[vehicle_idx] += nearest_customer['demand']
 
         vehicle_idx = (vehicle_idx + 1) % num_vehicles
 
@@ -224,9 +230,9 @@ def plot_routes(routes, customers):
 
 # Algorytm genetyczny z stagnacją
 def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size, generations,
-                      mutation_rate, crossing_rate, stagnation_limit=20):
+                      mutation_rate, crossing_rate, stagnation_limit=30):
     depot = customers[0]
-    population = initialize_population(customers, population_size, num_vehicles)
+    population = initialize_population(customers, population_size, num_vehicles, vehicle_capacity)
 
     best_solution = None
     best_distance = float('inf')
@@ -284,9 +290,9 @@ def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size
 
 # Przykład użycia
 if __name__ == "__main__":
-    customers = load_data("rc1.txt")
+    customers = load_data("c1.txt")
     vehicle_capacity = 200
-    best_solution, distance = genetic_algorithm(customers=customers, vehicle_capacity=vehicle_capacity, num_vehicles=15,
+    best_solution, distance = genetic_algorithm(customers=customers, vehicle_capacity=vehicle_capacity, num_vehicles=10,
                                       generations=500, population_size=100, mutation_rate=0.3, crossing_rate=0.8)
     print("Best Solution: ", best_solution)
     print("Total distance: ", distance)
