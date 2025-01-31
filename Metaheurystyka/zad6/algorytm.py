@@ -91,9 +91,9 @@ def nearest_neighbor_solution(customers, num_vehicles, vehicle_capacity):
         else:
             last_customer = customers[routes[vehicle_idx][-1] - 1]
         nearest_customer = None
-        for customer in sorted(remaining_customers, key=lambda c: distance(last_customer, c)):
-            if vehicle_loads[vehicle_idx] + customer['demand'] <= vehicle_capacity:
-                nearest_customer = customer
+        for i in range(len(remaining_customers)):
+            nearest_customer = min(remaining_customers, key=lambda c: distance(last_customer, c))
+            if vehicle_loads[vehicle_idx] + nearest_customer['demand'] <= vehicle_capacity:
                 break
         if nearest_customer:
             routes[vehicle_idx].append(nearest_customer['id'])
