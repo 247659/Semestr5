@@ -117,16 +117,14 @@ def selection(population, customers, vehicle_capacity, depot, tournament_size=5)
 
 # Krzyżowanie (PMX)
 def crossover(parent1, parent2):
+    # Spłaszczenie rodziców do jednej listy
     flat_parent1 = [customer for route in parent1 for customer in route]
     flat_parent2 = [customer for route in parent2 for customer in route]
-
-    route_size = len(parent1[0])
 
     size = len(flat_parent1)
     point1, point2 = sorted(random.sample(range(size), 2))
 
     child = [None] * size
-
     child[point1:point2] = flat_parent1[point1:point2]
 
     ptr = 0
@@ -137,16 +135,14 @@ def crossover(parent1, parent2):
             child[i] = flat_parent2[ptr]
             ptr += 1
 
+    # Odtworzenie struktury tras na podstawie oryginalnych długości tras rodzica 1
+    route_sizes = [len(route) for route in parent1]  # Zachowanie oryginalnej struktury
+
     child_routes = []
-    current_route = []
-    for customer in child:
-        if not current_route or len(current_route) < route_size:
-            current_route.append(customer)
-        else:
-            child_routes.append(current_route)
-            current_route = [customer]
-    if current_route:
-        child_routes.append(current_route)
+    start = 0
+    for size in route_sizes:
+        child_routes.append(child[start:start + size])
+        start += size
 
     return child_routes
 
