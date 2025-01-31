@@ -42,12 +42,12 @@ def evaluate_solution(solution, customers, vehicle_capacity, depot):
             total_distance += dist
             # current_time += dist
 
-
             if current_time < customer['ready_time']:
                 wait_time = customer['ready_time'] - current_time
                 current_time += wait_time
+                total_violation += wait_time
             elif current_time > customer['due_date']:
-                total_violation += current_time - customer['due_date']
+                total_violation += (current_time - customer['due_date'])
 
             current_time += customer['service_time']
             current_capacity += customer['demand']
@@ -60,7 +60,7 @@ def evaluate_solution(solution, customers, vehicle_capacity, depot):
         dist = distance(last_customer, depot)
         total_distance += dist
 
-    return total_distance, total_violation, total_distance + 0.2 * total_violation
+    return total_distance, total_violation, total_distance + 0.1 * total_violation
 
 
 def sort_route_by_ready_time(route, customers):
@@ -154,18 +154,19 @@ def mutate(solution, mutation_rate):
     return solution
 
 
-def two_opt(route, customers):
+def two_opt(route, customers, depot):
     improved = True
     while improved:
         improved = False
         for i in range(1, len(route) - 1):
             for j in range(i + 1, len(route)):
                 new_route = route[:i] + route[i:j][::-1] + route[j:]
-                new_distance = calculate_route_distance(new_route, customers)
-                old_distance = calculate_route_distance(route, customers)
-                if new_distance < old_distance:
+                new_distance, new_violation, new_total = evaluate_solution([new_route], customers, vehicle_capacity, depot)
+                old_distance, old_violation, old_total = evaluate_solution([route], customers, vehicle_capacity, depot)
+                if new_total < old_total:
                     route = new_route
                     improved = True
+                    # print('wykonano')
     return route
 
 
@@ -264,12 +265,12 @@ def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size
 
             child1 = mutate(child1, mutation_rate)
             for i in range(len(child1)):
-                child1[i] = two_opt(child1[i], customers)
+                child1[i] = two_opt(child1[i], customers, depot)
                 child1[i] = sort_route_by_ready_time(child1[i], customers)
             new_population.append(child1)
             child2 = mutate(child2, mutation_rate)
             for i in range(len(child2)):
-                child2[i] = two_opt(child2[i], customers)
+                child2[i] = two_opt(child2[i], customers, depot)
                 child2[i] = sort_route_by_ready_time(child2[i], customers)
             new_population.append(child2)
 
@@ -283,10 +284,10 @@ def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size
 
 # Przykład użycia
 if __name__ == "__main__":
-    customers = load_data("c1.txt")
+    customers = load_data("rc1.txt")
     vehicle_capacity = 200
-    best_solution, distance = genetic_algorithm(customers=customers, vehicle_capacity=vehicle_capacity, num_vehicles=10,
-                                      generations=500, population_size=150, mutation_rate=0.1, crossing_rate=0.8)
+    best_solution, distance = genetic_algorithm(customers=customers, vehicle_capacity=vehicle_capacity, num_vehicles=15,
+                                      generations=500, population_size=100, mutation_rate=0.3, crossing_rate=0.8)
     print("Best Solution: ", best_solution)
     print("Total distance: ", distance)
     print("Best Solution Routes:")
