@@ -31,7 +31,6 @@ def distance(c1, c2):
 def evaluate_solution(solution, customers, vehicle_capacity, depot):
     total_distance = 0
     total_violation = 0
-
     for route in solution:
         current_capacity = 0
         current_time = 0
@@ -60,7 +59,7 @@ def evaluate_solution(solution, customers, vehicle_capacity, depot):
         dist = distance(last_customer, depot)
         total_distance += dist
 
-    return total_distance, total_violation, total_distance + 0.1 * total_violation
+    return total_distance, total_violation, total_distance + 0.3 * total_violation
 
 
 def sort_route_by_ready_time(route, customers):
@@ -87,13 +86,19 @@ def nearest_neighbor_solution(customers, num_vehicles, vehicle_capacity):
 
     while remaining_customers:
         if not routes[vehicle_idx]:
-            last_customer = depot
+            nearest_customer = remaining_customers[0]
+            routes[vehicle_idx].append(nearest_customer['id'])
+            remaining_customers.remove(nearest_customer)
+            vehicle_loads[vehicle_idx] += nearest_customer['demand']
+            continue
         else:
             last_customer = customers[routes[vehicle_idx][-1] - 1]
+
         nearest_customer = None
         for i in range(len(remaining_customers)):
-            nearest_customer = min(remaining_customers, key=lambda c: distance(last_customer, c))
-            if vehicle_loads[vehicle_idx] + nearest_customer['demand'] <= vehicle_capacity:
+            customer = min(remaining_customers, key=lambda c: distance(last_customer, c))
+            if vehicle_loads[vehicle_idx] + customer['demand'] <= vehicle_capacity:
+                nearest_customer = customer
                 break
         if nearest_customer:
             routes[vehicle_idx].append(nearest_customer['id'])
@@ -102,6 +107,10 @@ def nearest_neighbor_solution(customers, num_vehicles, vehicle_capacity):
 
         vehicle_idx = (vehicle_idx + 1) % num_vehicles
 
+    # print("Pozostało: ", len(remaining_customers))
+    # x, y, z = evaluate_solution(routes, customers, vehicle_capacity, depot)
+    # print("Dystans: ", x)
+    # print("Osobnik: ", routes)
     return routes
 
 
@@ -148,12 +157,14 @@ def crossover(parent1, parent2):
 
 
 # Mutacja (swap)
-def mutate(solution, mutation_rate):
-    for i in range(len(solution)):
-        if random.random() < mutation_rate:
-            j = random.randint(0, len(solution) - 1)
-            solution[i], solution[j] = solution[j], solution[i]
-    return solution
+def mutate(solution):
+    new_solution = [route[:] for route in solution]
+
+    route1, route2 = random.sample(new_solution, 2)
+    if route1 and route2:
+        i, j = random.randint(0, len(route1) - 1), random.randint(0, len(route2) - 1)
+        route1[i], route2[j] = route2[j], route1[i]
+    return new_solution
 
 
 def two_opt(route, customers, depot):
@@ -226,10 +237,11 @@ def plot_routes(routes, customers):
 
 # Algorytm genetyczny z stagnacją
 def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size, generations,
-                      mutation_rate, crossing_rate, stagnation_limit=30):
+                      mutation_rate, crossing_rate):
     depot = customers[0]
     population = initialize_population(customers, population_size, num_vehicles, vehicle_capacity)
-
+    print("Populacja początkowa: ", population)
+    stagnation_limit = 30
     best_solution = None
     best_distance = float('inf')
     stagnation_counter = 0
@@ -265,20 +277,20 @@ def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size
                 child1 = parent1
                 child2 = parent2
 
-            child1 = mutate(child1, mutation_rate)
-            for i in range(len(child1)):
-                child1[i] = two_opt(child1[i], customers, depot)
-                child1[i] = sort_route_by_ready_time(child1[i], customers)
+            if random.random() < mutation_rate:
+                child1 = mutate(child1)
+                child2 = mutate(child2)
+
+            for a in range(len(child1)):
+                child1[a] = two_opt(child1[a], customers, depot)
             new_population.append(child1)
-            child2 = mutate(child2, mutation_rate)
-            for i in range(len(child2)):
-                child2[i] = two_opt(child2[i], customers, depot)
-                child2[i] = sort_route_by_ready_time(child2[i], customers)
+
+            for b in range(len(child2)):
+                child2[b] = two_opt(child2[b], customers, depot)
             new_population.append(child2)
 
         population = new_population
 
-        # Ocena najlepszego rozwiązania w populacji
         print(f"Generation {generation}: Best Distance = {best_distance}, Stagnation Counter = {stagnation_counter}")
 
     return best_solution, best_distance
@@ -286,9 +298,9 @@ def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size
 
 # Przykład użycia
 if __name__ == "__main__":
-    customers = load_data("c1.txt")
+    customers = load_data("rc1.txt")
     vehicle_capacity = 200
-    best_solution, distance = genetic_algorithm(customers=customers, vehicle_capacity=vehicle_capacity, num_vehicles=10,
+    best_solution, distance = genetic_algorithm(customers=customers, vehicle_capacity=vehicle_capacity, num_vehicles=15,
                                       generations=500, population_size=100, mutation_rate=0.3, crossing_rate=0.8)
     print("Best Solution: ", best_solution)
     print("Total distance: ", distance)
