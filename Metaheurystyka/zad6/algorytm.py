@@ -40,7 +40,7 @@ def evaluate_solution(solution, customers, vehicle_capacity, depot):
             customer = customers[customer_id - 1]
             dist = distance(last_customer, customer)
             total_distance += dist
-            current_time += dist
+            # current_time += dist
 
 
             if current_time < customer['ready_time']:
@@ -60,7 +60,7 @@ def evaluate_solution(solution, customers, vehicle_capacity, depot):
         dist = distance(last_customer, depot)
         total_distance += dist
 
-    return total_distance, total_violation
+    return total_distance, total_violation, total_distance + 0.2 * total_violation
 
 
 def sort_route_by_ready_time(route, customers):
@@ -75,7 +75,6 @@ def initialize_population(customers, population_size, num_vehicles):
         routes = [sort_route_by_ready_time(route, customers) for route in routes]
         population.append(routes)
     return population
-
 
 def nearest_neighbor_solution(customers, num_vehicles):
     depot = customers[0]
@@ -105,7 +104,7 @@ def selection(population, customers, vehicle_capacity, depot, tournament_size=5)
     selected = []
     for _ in range(len(population)):
         tournament = random.sample(population, tournament_size)
-        best = min(tournament, key=lambda x: evaluate_solution(x, customers, vehicle_capacity, depot)[0])
+        best = min(tournament, key=lambda x: evaluate_solution(x, customers, vehicle_capacity, depot)[2])
         selected.append(best)
     return selected
 
@@ -183,7 +182,6 @@ def calculate_route_distance(route, customers):
 
 
 # Funkcja do rysowania tras
-# Funkcja do rysowania tras
 def plot_routes(routes, customers):
     depot = customers[0]
     colors = plt.cm.tab10.colors  # Kolory dla poszczególnych tras
@@ -238,8 +236,8 @@ def genetic_algorithm(customers, vehicle_capacity, num_vehicles, population_size
         new_population = []
 
         # Elityzm: zachowaj najlepsze rozwiązanie
-        current_best_solution = min(population, key=lambda x: evaluate_solution(x, customers, vehicle_capacity, depot)[0])
-        current_distance, _ = evaluate_solution(current_best_solution, customers, vehicle_capacity, depot)
+        current_best_solution = min(population, key=lambda x: evaluate_solution(x, customers, vehicle_capacity, depot)[2])
+        current_distance, _, _ = evaluate_solution(current_best_solution, customers, vehicle_capacity, depot)
         new_population.append(current_best_solution)
 
         # Sprawdź, czy nastąpiła poprawa
@@ -288,7 +286,7 @@ if __name__ == "__main__":
     customers = load_data("c1.txt")
     vehicle_capacity = 200
     best_solution, distance = genetic_algorithm(customers=customers, vehicle_capacity=vehicle_capacity, num_vehicles=10,
-                                      generations=500, population_size=100, mutation_rate=0.3, crossing_rate=0.8)
+                                      generations=500, population_size=150, mutation_rate=0.1, crossing_rate=0.8)
     print("Best Solution: ", best_solution)
     print("Total distance: ", distance)
     print("Best Solution Routes:")
